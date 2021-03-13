@@ -4,6 +4,7 @@ const initialState = {
     yearSigns: [],
     monthSigns: [],
     daySigns: [],
+    sign: {},
 };
 
 function appReducer(state, action) {
@@ -12,6 +13,11 @@ function appReducer(state, action) {
             return {
                 ...state,
                 yearSigns: action.payload
+            };
+        case "GET_ZODIAC_SIGN":
+            return {
+                ...state,
+                sign: action.payload
             };
         default:
             return state;
@@ -28,11 +34,19 @@ export const GlobalProvider = ({ children }) => {
             payload: data
         });
     }
+    function getSign(data) {
+        dispatch({
+            type: "GET_ZODIAC_SIGN",
+            payload: data
+        });
+    }
     return (
         <GlobalContext.Provider
             value={{
                 yearSigns: state.yearSigns,
+                sign: state.sign,
                 getYearSigns,
+                getSign
             }}>
             {children}
         </GlobalContext.Provider>
