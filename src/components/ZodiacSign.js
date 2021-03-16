@@ -61,7 +61,7 @@ export const Sign = () => {
     const classes = useStyles(theme);
     const { getSign, sign } = useContext(GlobalContext);
     const [selectedDate, setDate] = useState(moment());
-    const [dob, setDob] = useState(moment().format("YYYY-MM-DD"));
+    const [dob, setDob] = useState(moment().format("MM-DD-YYYY"));
     const [open, setOpen] = useState(false);
 
     // the callback to useEffect can't be async, but you can declare async within
@@ -112,7 +112,7 @@ export const Sign = () => {
                                         required={true}
                                         fullWidth
                                         value={selectedDate}
-                                        format="YYYY-MM-DD"
+                                        format="MM-DD-YYYY"
                                         inputValue={dob}
                                         onChange={handleChange}
                                         rifmFormatter={dateFormatter}
