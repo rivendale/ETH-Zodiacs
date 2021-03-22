@@ -15,6 +15,7 @@ const useStyles = makeStyles((theme) => ({
     root: {
         width: '100%',
         backgroundColor: theme.palette.background.paper,
+        marginTop: theme.spacing(8),
     },
     inline: {
         display: 'inline',
@@ -56,7 +57,7 @@ export const YearSigns = () => {
                     {!!yearSigns.data.length && yearSigns.data.map((sign, key) => (
                         <Fragment key={key}>
                             <ListItem alignItems="flex-start">
-                                <Link href="#">
+                                <Link href={`/year-signs/${sign.id}`}>
                                     <ListItemAvatar>
                                         <Avatar alt={sign.name} src={sign.image_url} />
                                     </ListItemAvatar>
@@ -79,7 +80,7 @@ export const YearSigns = () => {
                                     }
                                 />
                                 <ListItemSecondaryAction>
-                                    <Link href="#">
+                                    <Link href={`/year-signs/${sign.id}`}>
                                         <IconButton color="inherit" aria-label="view details">
                                             <ArrowForwardIosIcon />
                                         </IconButton>
