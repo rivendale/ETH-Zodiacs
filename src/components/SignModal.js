@@ -134,6 +134,7 @@ export const SignModal = ({ sign, open, handleClose }) => {
                     </div>
 
                 </DialogContent>
+
             </Dialog>
 
         </div>

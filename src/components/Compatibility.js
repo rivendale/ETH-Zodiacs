@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -23,21 +23,18 @@ const useStyles = makeStyles({
 
 export default function Compatibility(props) {
     const classes = useStyles();
-    const { post } = props;
-
+    const { post, handleClick } = props;
     return (
         <Grid item xs={12} md={6}>
-            <CardActionArea component="a" href={`/year-signs/${post.id}`}>
+            <CardActionArea component="a" onClick={(e) => (handleClick(e, post.id))}>
                 <Card className={classes.card}>
                     <div className={classes.cardDetails}>
                         <CardContent>
                             <Typography component="h2" variant="h5">
-                                {post.title}
+                                {post.name}
                             </Typography>
-                            {/* <Typography variant="subtitle1" color="textSecondary">
-              </Typography> */}
                             <Typography variant="subtitle1" paragraph>
-                                {post.description.replace(/(.{150})..+/, "$1…")}
+                                {post.report[Math.floor(Math.random() * post.report.length)].replace(/(.{150})..+/, "$1…")}
                             </Typography>
                             <Typography variant="subtitle1" color="primary">
                                 Continue reading...
@@ -45,14 +42,10 @@ export default function Compatibility(props) {
                         </CardContent>
                     </div>
                     <Hidden xsDown>
-                        <CardMedia className={classes.cardMedia} image={post.image} title={post.imageTitle} />
+                        <CardMedia className={classes.cardMedia} image={post.image_url} title={post.imageTitle} />
                     </Hidden>
                 </Card>
             </CardActionArea>
         </Grid>
     );
 }
-
-Compatibility.propTypes = {
-    post: PropTypes.object,
-};

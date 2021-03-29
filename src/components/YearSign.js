@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { Typography, Container, Grid, makeStyles } from '@material-ui/core';
 import SignHeader from './SignHeader';
 import Compatibility from './Compatibility.js';
 import Main from './Report';
 import Sidebar from './Sidebar';
+import { GlobalContext } from "../context/GlobalState";
+import { useHistory } from 'react-router';
+import api from '../api';
+import { Spinner } from './common/Loaders';
 
 const useStyles = makeStyles((theme) => ({
   mainGrid: {
@@ -17,114 +21,165 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const mainFeaturedPost = {
-  title: 'Rat',
-  description:
-    "2021 is a year of the Ox, and the overall fortunes of Rat people (those born in a year of the Rat) are very good. Since the zodiac Rat and the zodiac Ox have a good relationship, the fortunes of Rat people will be exceptionally smooth.",
-  image: 'https://res.cloudinary.com/dsw3onksq/image/upload/v1615559952/rat_rlchaa.png',
-};
-
-const bestCompatibility = [
-  {
-    title: 'Dragon',
-    id: 5,
-    description:
-      'Usually energetic, strong and healthy you are also a very lucky person. When you walk into a room, heads turn; people whisper and eyes follow your every move. Competition thrills you, and you are often driven by your strong will to win. Tenacious and captivating, you like to stay in motion, stay preoccupied, and stay busy. The Dragon symbolizes life and growth, as reflected in their generous and scrupulous nature. You have the power to influence, to lead and impress. You are self confident and do not require nor your seek any reassurance. Confident, ambitious, and brave, a Dragon will work, sometimes from morning until night, in an effort to keep things running properly. You are capable of taking aggressive action if necessary.',
-    image: 'https://res.cloudinary.com/dsw3onksq/image/upload/v1615559951/dragon_icj3pt.png',
-  },
-  {
-    title: 'Monkey',
-    id: 9,
-    description:
-      'You are clever, mentally quick, and exceedingly resourceful. You are always hungry for knowledge and can excel at school. Your talents shine through your childhood. You have prodigious memories, a natural affinity to learn languages, and the ability to unravel the knottiest problems. You’re endlessly inventive and lucky with money. You are not only smart, but also have a good sense of humor. No wonder you are',
-    image: 'https://res.cloudinary.com/dsw3onksq/image/upload/v1615559951/monkey_zf2im5.png',
-  },
-];
-const worstCompatibility = [
-  {
-    title: 'Sheep/Goat',
-    id: 6,
-    description:
-      'Sheep are gentle and reflective, constructively applying their intelligence to the prevention of harm. You cannot live without beauty, and you strive for tranquility. Peace-loving, ardent, and easygoing, you can get along with nearly everyone. Sheep are the most sensitive of all the signs. This gentle soul is compassionate and loving, but tends toward moodiness and finds it difficult to work under pressure',
-    image: 'https://res.cloudinary.com/dsw3onksq/image/upload/v1615559951/goat_nibmxx.png',
-  },
-  {
-    title: 'Horse',
-    id: 7,
-    description:
-      'Enthusiastic and frank, you are quite lovable and easy to get along with. Charming and cheerful, you are very likable. Your vivacity and enthusiasm make you popular. Extroverted, energetic, and defiant against injustice, th',
-    image: 'https://res.cloudinary.com/dsw3onksq/image/upload/v1615559951/horse_flupw4.png',
-  },
-  {
-    title: 'Rabbit',
-    id: 5,
-    description:
-      'You have a very good judgement and refined creativity. You are a kind and helpful friend. The virtuous you possesses a highly developed sense of justice and fairness. Peace at all costs is essential for your creative flow. All the life the lesson to be learned is “detachment” . A Rabbit’s home is always beautiful because you are famous for your artistic sense and good taste. You are also well dressed.',
-    image: 'https://res.cloudinary.com/dsw3onksq/image/upload/v1615559952/rabbit_sjt1gi.png',
-  },
-  {
-    title: 'Rooster',
-    id: 10,
-    description:
-      'You are the thinker, the philosopher, and observant. You are smart, charming, witty, honest, blunt, capable, talented, brave, and self-reliant. You are hardworking, cautious, and critical too. Appearance is really important to you, and you certainly know how to dress up. However, because you are never satisfied, you are constantly improving yourself.  The personality of those born ',
-    image: 'https://res.cloudinary.com/dsw3onksq/image/upload/v1615559952/rooster_ignojl.png',
-  },
-];
-
-const report = [
-  "First position in zodiac makes you charming and creative. Well, you are one analytical soul who loves to dig down deeper in everything you take up. A curious mind that always searching for something. Highly intelligent and one your own kind. Born optimistic, you seem to have a solution for everything. Sense of humor comes naturally to you so is your energetic attitude towards life. ",
-  "You have the ability to adapt easily to most of the circumstances. It is very unlikely to find a Rat sitting quietly doing nothing.  Even when you have time to sit down and enjoy a short break, your mind will still be running nonstop, planning your next grand scheme. Since you are on your toes always, you seem to be nervous at times.",
-  "You are very expressive and talkative. You have a long list of phone numbers in your phone list, yet this does not make you too much social either. You are much of a private person and have a small list of friends. A perfect devotional and faithful friend always help someone in need. You are self-contained and often keep problems and secrets to yourself. You are extremely private and discreet when it comes to your personal life. You are natural teachers, and enjoy imparting life’s knowledge to all who care to listen.",
-  "Rats are resourceful and ambitious that they are often very financially successful. You are natural explorers and voyagers and adore all things different and unusual. Rats also make excellent managers and business owners. Sometimes, its difficult to understand you. Although, you are sharp critics, you usually maintain propriety and diplomacy. You enjoy every comfort of life- food and housing. Sometimes, you believe that you are better than others are, so you love to compete and conquer and always try to be the pioneer and the first in action. Although you are a great critic you generally tend to be diplomatic at times."
-];
-
-const positiveTraits = 'Authoritative, Capable, Careful, Clear-thinking'
-const negativeTraits = "Biased, Chauvinistic, Cold, Complacent"
-
 export const YearSign = () => {
   const classes = useStyles();
+  const { yearSigns, sign, getYearSigns, getSign } = useContext(GlobalContext);
+  const [bestCompatibility, setBestCompatibility] = useState([]);
+  const [worstCompatibility, setWorstCompatibility] = useState([]);
+  const [userSign, setUserSign] = useState({});
+  const [signs, setSigns] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [signUpdated, setSignUpdated] = useState(true);
+  const history = useHistory()
+
+  useEffect(() => {
+    if (sign.id) {
+      setUserSign(sign)
+    }
+    else if (localStorage.getItem("sign")) {
+      setUserSign(JSON.parse(localStorage.getItem("sign")))
+    }
+  }, [sign])
+
+  useEffect(() => {
+    if (!!Object.keys(yearSigns).length) {
+      setSigns(yearSigns)
+    }
+    else if (localStorage.getItem("yearSigns")) {
+      setSigns(JSON.parse(localStorage.getItem("yearSigns")))
+    }
+  }, [yearSigns])
+
+  const fetchSigns = useCallback(async () => {
+    setLoading(true)
+    await api({
+      method: "GET",
+      url: `year/`
+    }).then(data => {
+      getYearSigns(data.data.signs)
+      setLoading(false)
+    })
+      .catch(err => {
+        setLoading(false)
+        if (err.response) {
+          console.log(err.response)
+        } else if (err.request) {
+          console.log(err.request)
+        }
+      })
+  }, [getYearSigns])
+
+  const getCompatibility = useCallback(() => {
+    setBestCompatibility([])
+    signs.forEach(i => {
+      if ((i.name !== userSign.name) && userSign.best_compatibility.indexOf(i.name) > -1) {
+        setBestCompatibility(bestCompatibility => [...bestCompatibility, i])
+      }
+    })
+
+
+    setWorstCompatibility([])
+    signs.forEach(i => {
+      if ((i.name !== userSign.name) && userSign.worst_compatibility.indexOf(i.name) > -1) {
+        setWorstCompatibility(worstCompatibility => [...worstCompatibility, i])
+      }
+    })
+
+    setSignUpdated(false)
+  }, [signs, userSign.best_compatibility, userSign.name, userSign.worst_compatibility])
+  useEffect(() => {
+    if (userSign.id) {
+      if (!signs.length) {
+        fetchSigns()
+      }
+    }
+  }, [bestCompatibility.length, fetchSigns, getCompatibility, signs, userSign.id])
+
+  const handleClick = (e, value) => {
+    e.preventDefault()
+    const zodiacSign = signs.find(x => x.id === value)
+    getSign(zodiacSign)
+    setSignUpdated(true)
+    history.push(`/zodiac-sign/${zodiacSign.id}`)
+    window.scroll({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  function usePrevious(value) {
+    const ref = useRef();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  }
+
+  const prevSign = usePrevious(userSign)
+  useEffect(() => {
+    if (signUpdated) {
+      if (userSign.id && !!Object.keys(signs).length) {
+        getCompatibility()
+      }
+      if (prevSign && (!!Object.keys(prevSign).length) && (userSign.id) && (prevSign.id !== userSign.id)) {
+        console.log(prevSign.id, userSign.id)
+        // getCompatibility()
+      }
+    }
+  }, [getCompatibility, prevSign, signUpdated, signs, userSign.id])
 
   return (
     <React.Fragment>
       <Container maxWidth="lg">
-        <main>
-          <SignHeader post={mainFeaturedPost} />
+        {userSign.id && <main>
+          <SignHeader post={{ title: userSign.name, description: userSign.description, image: userSign.image_url }} />
           <Grid container spacing={5} className={classes.mainGrid}>
-            <Main title="Rat Description" report={report} />
+            <Main title="Rat Description" report={userSign.report} />
             <Sidebar
-              positiveTraits={positiveTraits}
-              negativeTraits={negativeTraits}
+              positiveTraits={userSign.positive_traits.join(', ')}
+              negativeTraits={userSign.negative_traits.join(', ')}
+              monthAnimal={userSign.month_animal}
+              dayAnimal={userSign.day_animal}
+              element={userSign.element}
+              force={userSign.force}
             />
           </Grid>
-          <Typography
-            component="h2"
-            variant="h5"
-            color="inherit"
-            align="center"
-            paragraph={true}
-          >
-            Best Compatibility
-        </Typography>
-          <Grid container spacing={4} className={classes.compatibility}>
-            {bestCompatibility.map((post) => (
-              <Compatibility key={post.title} post={post} />
-            ))}
-          </Grid>
-          <Typography
-            component="h2"
-            variant="h5"
-            color="inherit"
-            align="center"
-            paragraph={true}
-          >
-            Worst Compatibility
-        </Typography>
-          <Grid container spacing={4} className={classes.compatibility}>
-            {worstCompatibility.map((post) => (
-              <Compatibility key={post.title} post={post} />
-            ))}
-          </Grid>
+          {loading ? <Spinner /> :
+            <React.Fragment>
+              <Typography
+                component="h2"
+                variant="h5"
+                color="inherit"
+                align="center"
+                paragraph={true}
+              >
+
+                Best Compatibility
+              </Typography>
+              {bestCompatibility && <Grid container spacing={4} className={classes.compatibility}>
+                {bestCompatibility.map((post) => (
+                  <Compatibility key={post.name} post={post} handleClick={handleClick} />
+                ))}
+              </Grid>}
+              <Typography
+                component="h2"
+                variant="h5"
+                color="inherit"
+                align="center"
+                paragraph={true}
+              >
+                Worst Compatibility
+              </Typography>
+              {worstCompatibility && <Grid container spacing={4} className={classes.compatibility}>
+                {worstCompatibility.map((post) => (
+                  <Compatibility key={post.name} post={post} handleClick={handleClick} />
+                ))}
+              </Grid>
+              }
+            </React.Fragment>}
         </main>
+        }
       </Container>
     </React.Fragment>
   );

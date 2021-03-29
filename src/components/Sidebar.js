@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({
   sidebarAboutBox: {
     padding: theme.spacing(2),
     backgroundColor: theme.palette.grey[200],
-    marginBottom: theme.spacing(3),
+    marginBottom: theme.spacing(1),
   },
   // sidebarSection: {
   //   marginTop: theme.spacing(3),
@@ -19,10 +19,13 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Sidebar(props) {
   const classes = useStyles();
-  const { positiveTraits, negativeTraits } = props;
-
+  const { positiveTraits, negativeTraits, monthAnimal, dayAnimal, element, force } = props;
   return (
     <Grid item xs={12} md={4}>
+      <Paper elevation={0} className={classes.sidebarAboutBox}>
+        <Typography><b>Element:</b> {element}</Typography>
+        <Typography><b>Force:</b> {force}</Typography>
+      </Paper>
       <Paper elevation={0} className={classes.sidebarAboutBox}>
         <Typography variant="h6" gutterBottom>
           Positive Traits
@@ -35,6 +38,18 @@ export default function Sidebar(props) {
         </Typography>
         <Typography>{negativeTraits}</Typography>
       </Paper>
+      {monthAnimal && <Paper elevation={0} className={classes.sidebarAboutBox}>
+        <Typography variant="h6" gutterBottom>
+          Month Animal(s)
+        </Typography>
+        <Typography>{monthAnimal.animal}</Typography>
+      </Paper>}
+      {dayAnimal && <Paper elevation={0} className={classes.sidebarAboutBox}>
+        <Typography variant="h6" gutterBottom>
+          Day Animal(s)
+        </Typography>
+        <Typography>{dayAnimal.animal}</Typography>
+      </Paper>}
       {/* <Typography variant="h6" gutterBottom className={classes.sidebarSection}>
         Archives
       </Typography>

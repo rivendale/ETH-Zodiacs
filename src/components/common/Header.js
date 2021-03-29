@@ -25,15 +25,15 @@ const headersData = [
         href: "/",
     },
     {
-        label: "Year Signs",
+        label: "",
         href: "/year-signs",
     },
     {
-        label: "Month Signs",
+        label: "",
         href: "#",
     },
     {
-        label: "Day Signs",
+        label: "",
         href: "#",
     },
     {
@@ -48,14 +48,21 @@ const useStyles = makeStyles((theme) => ({
     },
     header: {
         backgroundColor: theme.palette.background.paper,
+        // background: 'linear-gradient(to right bottom, #4a1a1b, #9e917a, #f7e4c1)',
         color: "inherit",
-        "@media (max-width: 700px)": {
+        "@media (max-width: 790px)": {
             paddingLeft: 0,
         },
     },
     logo: {
-        fontWeight: 600,
-        textAlign: "left",
+        maxWidth: 45,
+        "@media (max-width: 900px)": {
+            display: "none",
+        },
+    },
+    companyLabel: {
+        fontWeight: 700,
+        size: "18px"
     },
     menuButton: {
         fontWeight: 700,
@@ -65,6 +72,7 @@ const useStyles = makeStyles((theme) => ({
     toolbar: {
         display: "flex",
         justifyContent: "space-between",
+        paddingLeft: 0,
     },
     drawerContainer: {
         padding: "20px 30px",
@@ -96,7 +104,7 @@ HideOnScroll.propTypes = {
 
 
 export default function Header(props) {
-    const { root, header, logo, menuButton, toolbar, drawerContainer } = useStyles();
+    const { root, header, companyLabel, logo, menuButton, toolbar, drawerContainer } = useStyles();
 
     const [state, setState] = useState({
         mobileView: false,
@@ -107,7 +115,7 @@ export default function Header(props) {
 
     useEffect(() => {
         const setResponsiveness = () => {
-            return window.innerWidth < 700
+            return window.innerWidth < 790
                 ? setState((prevState) => ({ ...prevState, mobileView: true }))
                 : setState((prevState) => ({ ...prevState, mobileView: false }));
         };
@@ -137,7 +145,6 @@ export default function Header(props) {
                 <IconButton
                     {...{
                         edge: "start",
-                        color: "inherit",
                         "aria-label": "menu",
                         "aria-haspopup": "true",
                         onClick: handleDrawerOpen,
@@ -180,16 +187,21 @@ export default function Header(props) {
     };
 
     const ethSignsLogo = (
-        <Typography variant="h6" component="h1">
-            <Link
-                href="/"
-                variant="h6"
-                color="inherit"
-                className={logo}
-            >
-                Ethsigns
+        <React.Fragment>
+            <Typography variant="h6" component="h1">
+                <img src="/assets/images/EthsignsLogo.png" alt="Ethsigns" className={logo} />
+            </Typography>
+            <Typography variant="h6" component="h1">
+                <Link
+                    href="/"
+                    variant="h6"
+                    color="inherit"
+                    className={companyLabel}
+                >
+                    Ethsigns
             </Link>
-        </Typography>
+            </Typography>
+        </React.Fragment>
     );
 
     const getMenuButtons = () => {
