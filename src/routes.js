@@ -14,7 +14,7 @@ const BaseRouter = () => (
         <Switch>
             <Route exact path="/" component={Sign} />
             <Route exact path="/year-signs" component={YearSigns} />
-            <Route exact path="/year-signs/:signId" component={YearSign} />
+            <Route exact path="/zodiac-sign/:1" component={YearSign} />
         </Switch>
     </div>
 );

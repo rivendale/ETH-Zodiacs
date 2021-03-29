@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos'; import { GlobalContext } from "../context/GlobalState";
 import api from "../api";
-import Spinner from './common/Spinner';
+import { Spinner } from './common/Loaders';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -80,7 +80,7 @@ export const YearSigns = () => {
                                     }
                                 />
                                 <ListItemSecondaryAction>
-                                    <Link href={`/year-signs/${sign.id}`}>
+                                    <Link href={`/zodiac-sign/${sign.id}`}>
                                         <IconButton color="inherit" aria-label="view details">
                                             <ArrowForwardIosIcon />
                                         </IconButton>
