@@ -79,8 +79,6 @@ export const Sign = () => {
             method: "GET",
             url: `query/?year=${dateOfBirth.getFullYear()}&month=${dateOfBirth.getMonth()}&day=${dateOfBirth.getDay()}`
         }).then(data => {
-            // console.log(data.data)
-
             // update local state with the retrieved data
             getSign(data.data.sign)
             localStorage.setItem("sign", JSON.stringify(data.data.sign))
@@ -111,7 +109,6 @@ export const Sign = () => {
             method: "GET",
             url: `year/`
         }).then(data => {
-            // localStorage.setItem("yearSigns", JSON.stringify(data.data.signs))
             getYearSigns(data.data.signs)
         })
             .catch(err => {
