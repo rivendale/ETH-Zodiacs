@@ -6,7 +6,6 @@ import Compatibility from './Compatibility.js';
 import Main from './Report';
 import Sidebar from './Sidebar';
 import { GlobalContext } from "../context/GlobalState";
-import { useHistory } from 'react-router';
 import api from '../api';
 import { Spinner } from './common/Loaders';
 
@@ -21,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export const YearSign = () => {
+export const YearSign = ({ history, match }) => {
   const classes = useStyles();
   const { yearSigns, sign, getYearSigns, getSign } = useContext(GlobalContext);
   const [bestCompatibility, setBestCompatibility] = useState([]);
@@ -29,26 +28,8 @@ export const YearSign = () => {
   const [userSign, setUserSign] = useState({});
   const [signs, setSigns] = useState({});
   const [loading, setLoading] = useState(false);
-  const [signUpdated, setSignUpdated] = useState(true);
-  const history = useHistory()
-
-  useEffect(() => {
-    if (sign.id) {
-      setUserSign(sign)
-    }
-    else if (localStorage.getItem("sign")) {
-      setUserSign(JSON.parse(localStorage.getItem("sign")))
-    }
-  }, [sign])
-
-  useEffect(() => {
-    if (!!Object.keys(yearSigns).length) {
-      setSigns(yearSigns)
-    }
-    else if (localStorage.getItem("yearSigns")) {
-      setSigns(JSON.parse(localStorage.getItem("yearSigns")))
-    }
-  }, [yearSigns])
+  const [signUpdated, setSignUpdated] = useState(false);
+  let signId = match.params.signId
 
   const fetchSigns = useCallback(async () => {
     setLoading(true)
@@ -68,6 +49,37 @@ export const YearSign = () => {
         }
       })
   }, [getYearSigns])
+
+
+  useEffect(() => {
+    if (sign && sign.id) {
+      setUserSign(sign)
+      setSignUpdated(true)
+    }
+  }, [sign])
+
+  useEffect(() => {
+    if (!!Object.keys(yearSigns).length) {
+      setSigns(yearSigns)
+    }
+    else {
+      fetchSigns()
+    }
+  }, [fetchSigns, signId, signs, yearSigns])
+
+  useEffect(() => {
+  }, [getSign, signId, signs])
+  if (!!Object.keys(signs).length && !signUpdated && !sign.id) {
+    try {
+      const zodiacSign = signs.find(x => x.id === +signId)
+      setUserSign(zodiacSign)
+      setSignUpdated(true)
+
+    } catch (error) {
+      console.log(error)
+
+    }
+  }
 
   const getCompatibility = useCallback(() => {
     setBestCompatibility([])
@@ -98,14 +110,14 @@ export const YearSign = () => {
   const handleClick = (e, value) => {
     e.preventDefault()
     const zodiacSign = signs.find(x => x.id === value)
-    getSign(zodiacSign)
-    setSignUpdated(true)
-    history.push(`/zodiac-sign/${zodiacSign.id}`)
+    localStorage.setItem("sign", JSON.stringify(zodiacSign))
+    history.push(`/zodiac-sign/${value}`)
     window.scroll({
       top: 0,
       left: 0,
       behavior: 'smooth'
     });
+    setSignUpdated(true)
   }
 
   function usePrevious(value) {
@@ -121,10 +133,6 @@ export const YearSign = () => {
     if (signUpdated) {
       if (userSign.id && !!Object.keys(signs).length) {
         getCompatibility()
-      }
-      if (prevSign && (!!Object.keys(prevSign).length) && (userSign.id) && (prevSign.id !== userSign.id)) {
-        console.log(prevSign.id, userSign.id)
-        // getCompatibility()
       }
     }
   }, [getCompatibility, prevSign, signUpdated, signs, userSign.id])
@@ -181,6 +189,7 @@ export const YearSign = () => {
         </main>
         }
       </Container>
+
     </React.Fragment>
   );
 }

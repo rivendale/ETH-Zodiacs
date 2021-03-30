@@ -25,16 +25,8 @@ const headersData = [
         href: "/",
     },
     {
-        label: "",
+        label: "Year Signs",
         href: "/year-signs",
-    },
-    {
-        label: "",
-        href: "#",
-    },
-    {
-        label: "",
-        href: "#",
     },
     {
         label: "About",
@@ -169,7 +161,7 @@ export default function Header(props) {
     };
 
     const getDrawerChoices = () => {
-        return headersData.map(({ label, href }) => {
+        return headersData.map(({ label, href }, key) => {
             return (
                 <Link
                     {...{
@@ -177,7 +169,7 @@ export default function Header(props) {
                         to: href,
                         color: "inherit",
                         style: { textDecoration: "none" },
-                        key: label,
+                        key: key,
                     }}
                 >
                     <MenuItem>{label}</MenuItem>
@@ -205,11 +197,11 @@ export default function Header(props) {
     );
 
     const getMenuButtons = () => {
-        return headersData.map(({ label, href }) => {
+        return headersData.map(({ label, href }, key) => {
             return (
                 <Button
                     {...{
-                        key: label,
+                        key: key,
                         color: "inherit",
                         to: href,
                         component: RouterLink,

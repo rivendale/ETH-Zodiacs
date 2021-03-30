@@ -30,7 +30,7 @@ export const SimpleBackdrop = ({ open }) => {
     return (
         <div>
             <Backdrop className={classes.backdrop} open={open}>
-                {/* <CircularProgress color="inherit" /> */}
+                <CircularProgress color="inherit" />
             </Backdrop>
         </div>
     );
