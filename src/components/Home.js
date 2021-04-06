@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
         margin: theme.spacing(3, 0, 2)
     }
 }));
-export const Sign = () => {
+export const Home = () => {
     const classes = useStyles(theme);
     const { getSign, sign, yearSigns, getYearSigns } = useContext(GlobalContext);
     const [selectedDate, setDate] = useState(moment());
@@ -66,7 +66,7 @@ export const Sign = () => {
     const [open, setOpen] = useState(false);
     const [spinnerOpen, setSpinnerOpen] = useState(false);
 
-    // const [loading, setLoading] = useState(false);
+
     const history = useHistory()
 
     // the callback to useEffect can't be async, but you can declare async within
@@ -77,7 +77,7 @@ export const Sign = () => {
         let dateOfBirth = new Date(dob);
         await api({
             method: "GET",
-            url: `query/?year=${dateOfBirth.getFullYear()}&month=${dateOfBirth.getMonth()}&day=${dateOfBirth.getDay()}`
+            url: `query/?year=${dateOfBirth.getFullYear()}&month=${dateOfBirth.getMonth() + 1}&day=${dateOfBirth.getUTCDate() + 1}`
         }).then(data => {
             // update local state with the retrieved data
             getSign(data.data.sign)
@@ -185,7 +185,7 @@ export const Sign = () => {
                             </form>
                         </div>
                     </Container>}
-            {sign.id && <SignModal sign={sign} open={open} handleClose={handleClose} />}
+            {sign && <SignModal sign={sign} open={open} handleClose={handleClose} />}
         </Fragment>
     );
 }

@@ -25,8 +25,6 @@ export const YearSign = ({ history, match }) => {
   const { yearSigns, sign, getYearSigns, getSign } = useContext(GlobalContext);
   const [bestCompatibility, setBestCompatibility] = useState([]);
   const [worstCompatibility, setWorstCompatibility] = useState([]);
-  const [userSign, setUserSign] = useState({});
-  const [signs, setSigns] = useState({});
   const [loading, setLoading] = useState(false);
   const [signUpdated, setSignUpdated] = useState(false);
   let signId = match.params.signId
@@ -38,6 +36,7 @@ export const YearSign = ({ history, match }) => {
       url: `year/`
     }).then(data => {
       getYearSigns(data.data.signs)
+      setSignUpdated(true)
       setLoading(false)
     })
       .catch(err => {
@@ -52,65 +51,49 @@ export const YearSign = ({ history, match }) => {
 
 
   useEffect(() => {
-    if (sign && sign.id) {
-      setUserSign(sign)
-      setSignUpdated(true)
+    const localSign = localStorage.getItem("sign") || null
+    if (!sign && localSign) {
+
+      getSign(JSON.parse(localSign))
     }
-  }, [sign])
+    setSignUpdated(true)
+  }, [getSign, sign])
 
   useEffect(() => {
-    if (!!Object.keys(yearSigns).length) {
-      setSigns(yearSigns)
-    }
-    else {
+
+    if (!Object.keys(yearSigns).length) {
       fetchSigns()
     }
-  }, [fetchSigns, signId, signs, yearSigns])
-
-  useEffect(() => {
-  }, [getSign, signId, signs])
-  if (!!Object.keys(signs).length && !signUpdated && !sign.id) {
-    try {
-      const zodiacSign = signs.find(x => x.id === +signId)
-      setUserSign(zodiacSign)
-      setSignUpdated(true)
-
-    } catch (error) {
-      console.log(error)
-
+    else if (!!Object.keys(yearSigns).length && !sign) {
+      const zodiacSign = yearSigns.find(x => x.id === +signId)
+      getSign(zodiacSign)
     }
-  }
+  }, [fetchSigns, getSign, sign, signId, yearSigns])
 
   const getCompatibility = useCallback(() => {
     setBestCompatibility([])
-    signs.forEach(i => {
-      if ((i.name !== userSign.name) && userSign.best_compatibility.indexOf(i.name) > -1) {
+    yearSigns.forEach(i => {
+      if ((i.name !== sign.name) && sign.best_compatibility.indexOf(i.name) > -1) {
         setBestCompatibility(bestCompatibility => [...bestCompatibility, i])
       }
     })
 
 
     setWorstCompatibility([])
-    signs.forEach(i => {
-      if ((i.name !== userSign.name) && userSign.worst_compatibility.indexOf(i.name) > -1) {
+    yearSigns.forEach(i => {
+      if ((i.name !== sign.name) && sign.worst_compatibility.indexOf(i.name) > -1) {
         setWorstCompatibility(worstCompatibility => [...worstCompatibility, i])
       }
     })
 
     setSignUpdated(false)
-  }, [signs, userSign.best_compatibility, userSign.name, userSign.worst_compatibility])
-  useEffect(() => {
-    if (userSign.id) {
-      if (!signs.length) {
-        fetchSigns()
-      }
-    }
-  }, [bestCompatibility.length, fetchSigns, getCompatibility, signs, userSign.id])
+  }, [yearSigns, sign])
+
 
   const handleClick = (e, value) => {
     e.preventDefault()
-    const zodiacSign = signs.find(x => x.id === value)
-    localStorage.setItem("sign", JSON.stringify(zodiacSign))
+    const zodiacSign = yearSigns.find(x => x.id === value)
+    getSign(zodiacSign)
     history.push(`/zodiac-sign/${value}`)
     window.scroll({
       top: 0,
@@ -128,67 +111,65 @@ export const YearSign = ({ history, match }) => {
     return ref.current;
   }
 
-  const prevSign = usePrevious(userSign)
+  const prevSign = usePrevious(sign)
   useEffect(() => {
     if (signUpdated) {
-      if (userSign.id && !!Object.keys(signs).length) {
+      if (sign && !!Object.keys(yearSigns).length) {
         getCompatibility()
       }
     }
-  }, [getCompatibility, prevSign, signUpdated, signs, userSign.id])
+  }, [getCompatibility, prevSign, signUpdated, yearSigns, sign])
 
   return (
     <React.Fragment>
-      <Container maxWidth="lg">
-        {userSign.id && <main>
-          <SignHeader post={{ title: userSign.name, description: userSign.description, image: userSign.image_url }} />
-          <Grid container spacing={5} className={classes.mainGrid}>
-            <Main title="Rat Description" report={userSign.report} />
-            <Sidebar
-              positiveTraits={userSign.positive_traits.join(', ')}
-              negativeTraits={userSign.negative_traits.join(', ')}
-              monthAnimal={userSign.month_animal}
-              dayAnimal={userSign.day_animal}
-              element={userSign.element}
-              force={userSign.force}
-            />
-          </Grid>
-          {loading ? <Spinner /> :
-            <React.Fragment>
-              <Typography
-                component="h2"
-                variant="h5"
-                color="inherit"
-                align="center"
-                paragraph={true}
-              >
+      {sign && <Container maxWidth="lg" component="main">
+        <SignHeader signId={signId} history={history} post={{ title: sign.name, description: sign.description, image: sign.image_url }} />
+        <Grid container spacing={5} className={classes.mainGrid}>
+          <Main title="Rat Description" report={sign.report} />
+          <Sidebar
+            positiveTraits={sign.positive_traits.join(', ')}
+            negativeTraits={sign.negative_traits.join(', ')}
+            monthAnimal={sign.month_animal}
+            dayAnimal={sign.day_animal}
+            element={sign.element}
+            force={sign.force}
+          />
+        </Grid>
+        {loading ? <Spinner /> :
+          <React.Fragment>
+            <Typography
+              component="h2"
+              variant="h5"
+              color="inherit"
+              align="center"
+              paragraph={true}
+            >
 
-                Best Compatibility
+              Best Compatibility
               </Typography>
-              {bestCompatibility && <Grid container spacing={4} className={classes.compatibility}>
-                {bestCompatibility.map((post) => (
-                  <Compatibility key={post.name} post={post} handleClick={handleClick} />
-                ))}
-              </Grid>}
-              <Typography
-                component="h2"
-                variant="h5"
-                color="inherit"
-                align="center"
-                paragraph={true}
-              >
-                Worst Compatibility
+            {bestCompatibility && <Grid container spacing={4} className={classes.compatibility}>
+              {bestCompatibility.map((post) => (
+                <Compatibility key={post.name} post={post} handleClick={handleClick} />
+              ))}
+            </Grid>}
+            <Typography
+              component="h2"
+              variant="h5"
+              color="inherit"
+              align="center"
+              paragraph={true}
+            >
+              Worst Compatibility
               </Typography>
-              {worstCompatibility && <Grid container spacing={4} className={classes.compatibility}>
-                {worstCompatibility.map((post) => (
-                  <Compatibility key={post.name} post={post} handleClick={handleClick} />
-                ))}
-              </Grid>
-              }
-            </React.Fragment>}
-        </main>
-        }
-      </Container>
+            {worstCompatibility && <Grid container spacing={4} className={classes.compatibility}>
+              {worstCompatibility.map((post) => (
+                <Compatibility key={post.name} post={post} handleClick={handleClick} />
+              ))}
+            </Grid>
+            }
+          </React.Fragment>}
+
+      </Container>}
 
     </React.Fragment>
   );

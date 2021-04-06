@@ -4,7 +4,7 @@ const initialState = {
     yearSigns: [],
     monthSigns: [],
     daySigns: [],
-    sign: {},
+    sign: null
 };
 
 function appReducer(state, action) {
