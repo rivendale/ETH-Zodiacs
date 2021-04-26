@@ -1,50 +1,34 @@
-
+import React, { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
-    AppBar,
-    Toolbar,
-    Typography,
-    makeStyles,
-    Button,
-    IconButton,
-    Drawer,
-    Link,
-    MenuItem,
-    Container,
-} from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import React, { useState, useEffect } from "react";
-import { Link as RouterLink } from "react-router-dom";
-import useScrollTrigger from '@material-ui/core/useScrollTrigger';
-import PropTypes from 'prop-types';
-import Slide from '@material-ui/core/Slide';
+    makeStyles, Typography, Toolbar, Button, AppBar,
+    Link, IconButton, Menu, MenuItem, Badge, Avatar, Tooltip,
+} from '@material-ui/core';
+import { StyledBadge } from './StyledBadge';
+import { ethBrowserPresent, getAccount, getConnectedAccount } from '../eth/EthAccount';
+import { EthContext } from '../../context/EthContext';
+import Message from './MessageDialog';
+import { EthIcon } from './EthIcon';
 
-
-const headersData = [
-    {
-        label: "My Sign",
-        href: "/",
-    },
-    {
-        label: "Year Signs",
-        href: "/year-signs",
-    },
-    {
-        label: "About",
-        href: "#",
-    },
-];
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1
+    appBar: {
+        borderBottom: `1px solid ${theme.palette.divider}`,
     },
-    header: {
-        backgroundColor: theme.palette.background.paper,
-        // background: 'linear-gradient(to right bottom, #4a1a1b, #9e917a, #f7e4c1)',
-        color: "inherit",
-        "@media (max-width: 790px)": {
-            paddingLeft: 0,
-        },
+    toolbar: {
+        flexWrap: 'wrap',
+    },
+    toolbarTitle: {
+        flexGrow: 1,
+    },
+    link: {
+        margin: theme.spacing(1, 1.5),
+    },
+    badge: {
+        paddingRight: theme.spacing(5)
+    },
+    icons: {
+        width: "1.2em"
     },
     logo: {
         maxWidth: 45,
@@ -52,173 +36,110 @@ const useStyles = makeStyles((theme) => ({
             display: "none",
         },
     },
-    companyLabel: {
-        fontWeight: 700,
-        size: "18px"
-    },
-    menuButton: {
-        fontWeight: 700,
-        size: "18px",
-        marginLeft: "38px",
-    },
-    toolbar: {
-        display: "flex",
-        justifyContent: "space-between",
-        paddingLeft: 0,
-    },
-    drawerContainer: {
-        padding: "20px 30px",
-    },
 }));
 
-function HideOnScroll(props) {
-    const { children, window } = props;
-    // Note that you normally won't need to set the window ref as useScrollTrigger
-    // will default to window.
-    // This is only being set here because the demo is in an iframe.
-    const trigger = useScrollTrigger({ target: window ? window() : undefined });
 
-    return (
-        <Slide appear={false} direction="down" in={!trigger}>
-            {children}
-        </Slide>
-    );
-}
+export default function Header() {
+    const classes = useStyles();
+    const { ethAccount, getEthAccount } = useContext(EthContext)
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [ethBrowserError, setEthBrowserError] = useState(false)
+    const open = Boolean(anchorEl);
+    let history = useHistory();
 
-HideOnScroll.propTypes = {
-    children: PropTypes.element.isRequired,
-    /**
-     * Injected by the documentation to work in an iframe.
-     * You won't need it on your project.
-     */
-    window: PropTypes.func,
-};
+    const handleMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
 
-
-export default function Header(props) {
-    const { root, header, companyLabel, logo, menuButton, toolbar, drawerContainer } = useStyles();
-
-    const [state, setState] = useState({
-        mobileView: false,
-        drawerOpen: false,
-    });
-
-    const { mobileView, drawerOpen } = state;
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     useEffect(() => {
-        const setResponsiveness = () => {
-            return window.innerWidth < 790
-                ? setState((prevState) => ({ ...prevState, mobileView: true }))
-                : setState((prevState) => ({ ...prevState, mobileView: false }));
-        };
-
-        setResponsiveness();
-
-        window.addEventListener("resize", () => setResponsiveness());
-    }, []);
-
-    const displayDesktop = () => {
-        return (
-            <Toolbar component="nav" variant="dense" className={toolbar}>
-                {ethSignsLogo}
-                <div>{getMenuButtons()}</div>
-            </Toolbar>
-        );
-    };
-
-    const displayMobile = () => {
-        const handleDrawerOpen = () =>
-            setState((prevState) => ({ ...prevState, drawerOpen: true }));
-        const handleDrawerClose = () =>
-            setState((prevState) => ({ ...prevState, drawerOpen: false }));
-
-        return (
-            <Toolbar>
-                <IconButton
-                    {...{
-                        edge: "start",
-                        "aria-label": "menu",
-                        "aria-haspopup": "true",
-                        onClick: handleDrawerOpen,
-                    }}
-                >
-                    <MenuIcon />
-                </IconButton>
-
-                <Drawer
-                    {...{
-                        anchor: "left",
-                        open: drawerOpen,
-                        onClose: handleDrawerClose,
-                    }}
-                >
-                    <div className={drawerContainer}>{getDrawerChoices()}</div>
-                </Drawer>
-
-                <div>{ethSignsLogo}</div>
-            </Toolbar>
-        );
-    };
-
-    const getDrawerChoices = () => {
-        return headersData.map(({ label, href }, key) => {
-            return (
-                <Link
-                    {...{
-                        component: RouterLink,
-                        to: href,
-                        color: "inherit",
-                        style: { textDecoration: "none" },
-                        key: key,
-                    }}
-                >
-                    <MenuItem>{label}</MenuItem>
-                </Link>
-            );
-        });
-    };
-
-    const ethSignsLogo = (
-        <React.Fragment>
-            <Typography variant="h6" component="h1">
-                <img src="/assets/images/EthsignsLogo.png" alt="Ethsigns" className={logo} />
-            </Typography>
-            <Typography variant="h6" component="h1">
-                <Link
-                    href="/"
-                    variant="h6"
-                    color="inherit"
-                    className={companyLabel}
-                >
-                    Ethsigns
-            </Link>
-            </Typography>
-        </React.Fragment>
-    );
-
-    const getMenuButtons = () => {
-        return headersData.map(({ label, href }, key) => {
-            return (
-                <Button
-                    {...{
-                        key: key,
-                        color: "inherit",
-                        to: href,
-                        component: RouterLink,
-                        className: menuButton,
-                    }}
-                >
-                    {label}
-                </Button>
-            );
-        });
+        getConnectedAccount().then(acc => {
+            if (acc) {
+                getEthAccount(acc)
+            }
+        })
+    })
+    const connectAccount = async () => {
+        if (!ethAccount) {
+            const isEthBrowserPresent = await ethBrowserPresent()
+            if (isEthBrowserPresent) {
+                const account = await getAccount()
+                getEthAccount(account)
+            }
+            else
+                setEthBrowserError(true)
+        }
     };
 
     return (
-        <Container maxWidth="lg" className={root}>
-            <AppBar position="sticky" className={header} variant="outlined">
-                {mobileView ? displayMobile() : displayDesktop()}
+        <React.Fragment>
+            {ethBrowserError && <Message />}
+            <AppBar position="static" color="default" elevation={0} className={classes.appBar}>
+                <Toolbar className={classes.toolbar}>
+                    <Typography noWrap className={classes.toolbarTitle}>
+                        <Link variant="h6" color="inherit" href="/">
+                            <img src="/assets/images/EthsignsLogo.png" alt="Ethsigns" className={classes.logo} />
+                        </Link>
+                    </Typography>
+                    <Button href="/year-signs" color="primary" variant="text" className={classes.link}>
+                        Year Signs
+                    </Button>
+
+
+                    {!ethAccount ?
+                        <Button onClick={connectAccount} color="primary" variant="outlined" className={classes.link}>
+                            Connect with Metamask
+                        </Button> :
+                        <Tooltip title={ethAccount}>
+                            <Typography variant="body2" noWrap aria-label="deposit-funds">
+                                <EthIcon ethAccount={ethAccount} />
+                            </Typography>
+                        </Tooltip>
+                    }
+                    <div>
+                        <IconButton
+                            aria-label="account of current user"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            onClick={handleMenu}
+                            color="inherit"
+                        >
+                            {/* <AccountCircle /> */}
+                            <StyledBadge
+                                overlap="circle"
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'right',
+                                }}
+                                variant="dot"
+                            >
+                                <Avatar alt="M" src={"."} />
+                            </StyledBadge>
+                        </IconButton>
+                        <Menu
+                            id="menu-appbar"
+                            anchorEl={anchorEl}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            open={open}
+                            onClose={handleClose}
+                        >
+                            <MenuItem onClick={handleClose}>Profile</MenuItem>
+                            <MenuItem onClick={handleClose}>My account</MenuItem>
+                            <MenuItem onClick={handleClose}>Logout</MenuItem>
+                        </Menu>
+                    </div>
+                </Toolbar>
             </AppBar>
-        </Container>
-    );
+        </React.Fragment >)
 }
