@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
-import { Typography, Container, Grid, makeStyles } from '@material-ui/core';
+import { Typography, Container, Grid, makeStyles, Fab } from '@material-ui/core';
 import SignHeader from './SignHeader';
 import Compatibility from './Compatibility.js';
 import Main from './Report';
@@ -8,6 +8,9 @@ import Sidebar from './Sidebar';
 import { GlobalContext } from "../context/GlobalState";
 import api from '../api';
 import { Spinner } from './common/Loaders';
+import { createNFTFromAssetData } from './eth/EthAccount';
+
+import BuildOutlinedIcon from '@material-ui/icons/BuildOutlined';
 
 const useStyles = makeStyles((theme) => ({
   mainGrid: {
@@ -26,6 +29,8 @@ export const YearSign = ({ history, match }) => {
   const [bestCompatibility, setBestCompatibility] = useState([]);
   const [worstCompatibility, setWorstCompatibility] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [minting, setMinting] = useState(false);
+  const [transactionHash, setTransactionHash] = useState("");
   const [signUpdated, setSignUpdated] = useState(false);
   let signId = match.params.signId
 
@@ -110,6 +115,15 @@ export const YearSign = ({ history, match }) => {
     });
     return ref.current;
   }
+  const handleMintNFT = (e) => {
+    e.preventDefault()
+    setMinting(true)
+    createNFTFromAssetData(sign).then(data => {
+      const { hash, } = data
+      setMinting(false)
+      setTransactionHash(hash)
+    })
+  }
 
   const prevSign = usePrevious(sign)
   useEffect(() => {
@@ -124,6 +138,21 @@ export const YearSign = ({ history, match }) => {
     <React.Fragment>
       {sign && <Container maxWidth="lg" component="main">
         <SignHeader signId={signId} history={history} post={{ title: sign.name, description: sign.description, image: sign.image_url }} />
+        {transactionHash && <span>
+          Your transaction is being processed. For more details, click <a rel="noopener noreferrer" href={`https://ropsten.etherscan.io/tx/${transactionHash}`} target="_blank">here</a> can view it on EthScan
+        </span>}
+        {!transactionHash &&
+          <span>
+            {!minting ?
+              <Fab onClick={handleMintNFT} size="small" disabled={minting} variant="extended" style={{ textTransform: "none" }}>
+                <BuildOutlinedIcon className={classes.extendedIcon} />
+              Mint NFT
+            </Fab> :
+              <Fab size="small" variant="extended">
+                Minting NFT... <Spinner />
+              </Fab>}
+          </span>}
+
         <Grid container spacing={5} className={classes.mainGrid}>
           <Main title="Rat Description" report={sign.report} />
           <Sidebar

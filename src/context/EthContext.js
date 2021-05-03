@@ -2,6 +2,8 @@ import React, { createContext, useReducer } from "react";
 
 const initialState = {
     ethAccount: null,
+    ethTokenIds: null,
+    ethTokens: null,
 };
 
 function ethReducer(state, action) {
@@ -10,6 +12,16 @@ function ethReducer(state, action) {
             return {
                 ...state,
                 ethAccount: action.payload
+            };
+        case "GET_ETH_TOKEN_IDS":
+            return {
+                ...state,
+                ethTokenIds: action.payload
+            };
+        case "GET_ETH_TOKENS":
+            return {
+                ...state,
+                ethTokens: action.payload
             };
         default:
             return state;
@@ -26,11 +38,27 @@ export const EthProvider = ({ children }) => {
             payload: data
         });
     }
+    function getEthTokenIds(data) {
+        dispatch({
+            type: "GET_ETH_TOKEN_IDS",
+            payload: data
+        });
+    }
+    function getEthTokens(data) {
+        dispatch({
+            type: "GET_ETH_TOKENS",
+            payload: data
+        });
+    }
     return (
         <EthContext.Provider
             value={{
                 ethAccount: state.ethAccount,
+                ethTokenIds: state.ethTokenIds,
+                ethTokens: state.ethTokens,
                 getEthAccount,
+                getEthTokenIds,
+                getEthTokens,
             }}>
             {children}
         </EthContext.Provider>
