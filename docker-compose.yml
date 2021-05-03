@@ -1,5 +1,18 @@
-version: "3.1"
+version: "3"
 services:
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    environment:
+      - IPFS_PROFILE=server
+      - IPFS_PATH=/ipfsdata
+    volumes:
+      - ./data/ipfs:/ipfsdata
+    ports:
+      - "4001:4001"
+      - "127.0.0.1:8082:8080"
+      - "127.0.0.1:8071:8081"
+      - "127.0.0.1:5001:5001"
+
   web:
     restart: always
     build:
@@ -17,25 +30,15 @@ services:
       REACT_APP_PUBLIC_KEY: ${REACT_APP_PUBLIC_KEY}
       REACT_APP_ALCHEMY_API_URL: ${REACT_APP_ALCHEMY_API_URL}
       REACT_APP_PINATA_API_JWT_TOKEN: ${REACT_APP_PINATA_API_JWT_TOKEN}
-      REACT_APP_IPFS_API_URL: http://ipfs:5001
+      REACT_APP_IPFS_API_URL: ipfs:5001
       REACT_APP_IPFS_GATEWAY_URL: ${REACT_APP_IPFS_GATEWAY_URL}
     volumes:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt/:/etc/letsencrypt/
-    networks:
-      - ipfs-network
+# docker-compose exec ipfs ipfs config Addresses.Swarm '["/ip4/0.0.0.0/tcp/4001", "/ip4/0.0.0.0/tcp/8081/ws", "/ip6/::/tcp/4001"]' --json
+# docker-compose exec ipfs ipfs config API.HTTPHeaders.Access-Control-Allow-Origin "[\"*\"]" --json
+# docker-compose exec ipfs ipfs config API.HTTPHeaders.Access-Control-Allow-Credentials "[\"true\"]" --json
+# docker-compose exec ipfs ipfs config --bool Swarm.EnableRelayHop true
+# docker-compose exec ipfs ipfs config --bool Swarm.EnableAutoNATService true
+# docker-compose exec ipfs ipfs config --bool Swarm.EnableAutoRelay true
 
-  ipfs:
-    image: ipfs/go-ipfs
-    volumes:
-      - ./ipfs:/data/ipfs
-    ports:
-      - "4001:4001"
-      - "8080:8080"
-      - "8081:8081"
-      - "5001:5001"
-    networks:
-      - ipfs-network
-
-networks:
-  ipfs-network:

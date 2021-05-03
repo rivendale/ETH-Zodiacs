@@ -9,17 +9,16 @@ FROM node:15-alpine as builder
 WORKDIR /app
 
 # Copy both package.json AND package-lock.json
-COPY package*.json ./
+COPY package.json yarn.lock ./
 
 # Install production dependencies
-# RUN  npm set progress false && npm install --loglevel warn
-RUN  npm set progress false && npm install --only=production --loglevel warn
+RUN yarn
 
 COPY . .
 
 
 # Buncdle app source
-RUN npm run build
+RUN yarn build
 
 
 # nginx state for serving content
@@ -31,7 +30,7 @@ FROM nginx:1.19.0
 # RUN rm -rf ./*
 
 # Copy static assets from builder stage
-COPY --from=builder /app/build /usr/share/nginx/html 
+COPY --from=builder /app/build /usr/share/nginx/html
 
 # Copy nginx config
 COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf

@@ -29,3 +29,9 @@ yarn-error.log*
 
 # Eth
 ipfs/
+@openzeppelin/
+build-info/
+MyNFT.sol/
+Minty.dbg.json
+hardhat/
+compose/

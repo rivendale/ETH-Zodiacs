@@ -4,6 +4,7 @@ const Config = {
   ALCHEMY_API_URL: process.env.REACT_APP_ALCHEMY_API_URL,
   PUBLIC_KEY: process.env.REACT_APP_PUBLIC_KEY,
   PRIVATE_KEY: process.env.REACT_APP_PRIVATE_KEY,
+  CONTRACT_ADDRESS: process.env.REACT_APP_CONTRACT_ADDRESS,
   // The pinningService config tells minty what remote pinning service to use for pinning the IPFS data for a token.
   // The default config uses Pinata (https://pinata.cloud), and expects a JWT access token in the PINATA_API_TOKEN
   // environment variable.

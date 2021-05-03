@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import {
     makeStyles, Typography, Toolbar, Button, AppBar,
-    Link, IconButton, Menu, MenuItem, Badge, Avatar, Tooltip,
+    Link, IconButton, Menu, MenuItem, Avatar, Tooltip,
 } from '@material-ui/core';
 import { StyledBadge } from './StyledBadge';
 import { ethBrowserPresent, getAccount, getConnectedAccount } from '../eth/EthAccount';
@@ -32,9 +31,9 @@ const useStyles = makeStyles((theme) => ({
     },
     logo: {
         maxWidth: 45,
-        "@media (max-width: 900px)": {
-            display: "none",
-        },
+        // "@media (max-width: 900px)": {
+        //     display: "none",
+        // },
     },
 }));
 
@@ -44,8 +43,8 @@ export default function Header() {
     const { ethAccount, getEthAccount } = useContext(EthContext)
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [ethBrowserError, setEthBrowserError] = useState(false)
+    const [accountChecked, setAccountChecked] = useState(false)
     const open = Boolean(anchorEl);
-    let history = useHistory();
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -56,12 +55,16 @@ export default function Header() {
     };
 
     useEffect(() => {
-        getConnectedAccount().then(acc => {
-            if (acc) {
-                getEthAccount(acc)
-            }
-        })
-    })
+        if (!accountChecked) {
+
+            getConnectedAccount().then(acc => {
+                if (acc) {
+                    getEthAccount(acc)
+                }
+            })
+            setAccountChecked(true)
+        }
+    }, [accountChecked, getEthAccount])
     const connectAccount = async () => {
         if (!ethAccount) {
             const isEthBrowserPresent = await ethBrowserPresent()
@@ -88,6 +91,11 @@ export default function Header() {
                         Year Signs
                     </Button>
 
+                    {ethAccount &&
+                        <Button href="/my-signs" color="primary" variant="text" className={classes.link}>
+                            My Signs
+                    </Button>
+                    }
 
                     {!ethAccount ?
                         <Button onClick={connectAccount} color="primary" variant="outlined" className={classes.link}>
