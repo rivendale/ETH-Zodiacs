@@ -18,13 +18,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import ShareOutlinedIcon from '@material-ui/icons/ShareOutlined';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import moment from 'moment'
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fab } from '@material-ui/core';
 
 
-function createData(name, dateMined, assetURI, metadataURI, tokenId, assetGatewayURL, metadataGatewayURL) {
-    return { name, dateMined, assetURI, metadataURI, tokenId, assetGatewayURL, metadataGatewayURL };
+function createData(tokenId, nftURI, nftGatewayURL) {
+    return { tokenId, nftURI, nftGatewayURL };
 }
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -53,10 +52,9 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-    { id: 'name', numeric: false, disablePadding: true, label: 'Name' },
-    { id: 'dateMined', numeric: true, disablePadding: false, label: 'Date Mined' },
-    { id: 'assetURI', numeric: true, disablePadding: false, label: 'Asset URI' },
-    { id: 'metadataURI', numeric: true, disablePadding: false, label: 'Metadata URI' },
+    { id: 'tokenId', numeric: false, disablePadding: true, label: 'Token Id' },
+    { id: 'nftURI', numeric: true, disablePadding: false, label: 'Token URI' },
+    { id: 'nftGatewayURL', numeric: true, disablePadding: false, label: 'NFT Gateway URI' },
 ];
 
 function EnhancedTableHead(props) {
@@ -213,11 +211,7 @@ export const NFTTable = ({ tokens }) => {
 
     const rows = []
     tokens.map(token => (
-        rows.push(createData(
-            token.metadata.name,
-            moment(token.metadata.dateMinted ? token.metadata.dateMinted / 1000 : token.metadata.dateMinted).format("MM-DD-YYYY"),
-            token.assetURI, token.metadataURI, token.tokenId, token.assetGatewayURL, token.metadataGatewayURL),
-        )
+        rows.push(createData(token.tokenId, token.nftURI, token.nftGatewayURL))
     ))
 
     const handleRequestSort = (event, property) => {
@@ -271,7 +265,6 @@ export const NFTTable = ({ tokens }) => {
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
     return (
         <div className={classes.root}>
             <Paper className={classes.paper}>
@@ -280,7 +273,7 @@ export const NFTTable = ({ tokens }) => {
                     <Table
                         className={classes.table}
                         aria-labelledby="tableTitle"
-                        size={'medium'}
+                        size={'small'}
                         aria-label="enhanced table"
                     >
                         <EnhancedTableHead
@@ -316,17 +309,15 @@ export const NFTTable = ({ tokens }) => {
                                                 />
                                             </TableCell>
                                             <TableCell component="th" id={labelId} scope="row" padding="none">
-                                                {row.name}
-                                            </TableCell>
-                                            <TableCell align="right">{row.dateMined}</TableCell>
-                                            <TableCell align="right">
-                                                {row.assetURI.substr(7, 11) + '...' + row.assetURI.substr(row.assetURI.length - 6, row.assetURI.length)}
-                                                <OpenInNewIcon style={{ cursor: "pointer" }} onClick={() => handleRedirect(row.assetGatewayURL)} />
+                                                {row.tokenId}
                                             </TableCell>
                                             <TableCell align="right">
-                                                {/* {row.metadataURI.replace(/(.{15})..+/, "$1…")} */}
-                                                {row.metadataURI.substr(7, 11) + '...' + row.metadataURI.substr(row.metadataURI.length - 6, row.metadataURI.length)}
-                                                <OpenInNewIcon style={{ cursor: "pointer" }} onClick={() => handleRedirect(row.metadataGatewayURL)} />
+                                                {row.nftURI.substr(7, 11) + '...' + row.nftURI.substr(row.nftURI.length - 6, row.nftURI.length)}
+                                                <OpenInNewIcon style={{ cursor: "pointer" }} onClick={() => handleRedirect(row.nftGatewayURL)} />
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                {row.nftGatewayURL.substr(7, 11) + '...' + row.nftGatewayURL.substr(row.nftGatewayURL.length - 6, row.nftGatewayURL.length)}
+                                                <OpenInNewIcon style={{ cursor: "pointer" }} onClick={() => handleRedirect(row.nftGatewayURL)} />
                                             </TableCell>
                                         </TableRow>
                                     );

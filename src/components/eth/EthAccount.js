@@ -2,30 +2,54 @@ import config from '../../config'
 
 import { createAlchemyWeb3 } from "@alch/alchemy-web3"
 import contract from "../../artifacts/contracts/Minty.sol/Minty.json"
-import ipfsHttpClient from 'ipfs-http-client'
+// import ipfsHttpClient from 'ipfs-http-client'
+import { NFTStorage } from 'nft.storage'
+
 
 // import all from 'it-all'
-import CID from 'cids'
-import uint8ArrayConcat from 'uint8arrays/concat'
-import uint8ArrayToString from 'uint8arrays/to-string'
-import all from 'it-all'
+// import CID from 'cids'
+// import uint8ArrayConcat from 'uint8arrays/concat'
+// import uint8ArrayToString from 'uint8arrays/to-string'
+// import all from 'it-all'
+// import axios from 'axios'
 const web3 = createAlchemyWeb3(config.ALCHEMY_API_URL);
 const contractAddress = config.CONTRACT_ADDRESS
 // const contractAddress = "0xC11E32173729c5AbF46D6AdC0acb5b66174ea379"
 const nftContract = new web3.eth.Contract(contract.abi, contractAddress);
 
 
-const { urlSource } = ipfsHttpClient
-let ipfs
+// const { urlSource } = ipfsHttpClient
+// let ipfs
 
-const ipfsAddOptions = {
-    cidVersion: 1,
-    hashAlg: 'sha2-256'
+// const ipfsAddOptions = {
+//     cidVersion: 1,
+//     hashAlg: 'sha2-256'
+// }
+
+// ipfs = ipfsHttpClient(config.ipfsApiUrl)
+
+const client = new NFTStorage({ token: config.IPFS_API_KEY })
+
+async function ipfsAddAsset(asset, assetMetadata) {
+    // const imgData = await getFileFromUrl(imgUrl, "dragon.png")
+    const cid = await client.storeDirectory([asset,
+        new File([JSON.stringify(assetMetadata, null, 2)], 'metadata.json')])
+    return { cid }
 }
 
-ipfs = ipfsHttpClient(config.ipfsApiUrl)
+// getFileFromUrl(imgUrl, "dragon.png").then(data => {
+
+//     ipfsAddAsset(data, { name: "dragon", type: "3" }).then(cid => console.log(cid))
+// })
 
 
+async function getFileFromUrl(url, name, defaultType = 'image/jpeg') {
+    const response = await fetch(url);
+    const data = await response.blob();
+    return new File([data], name, {
+        type: response.headers.get('content-type') || defaultType,
+    });
+}
 
 
 export const ethBrowserPresent = async () => {
@@ -74,7 +98,6 @@ export const getAccountTokenIds = async () => {
 
         await Promise.all(range.map(async (i) => {
             const id = await nftContract.methods.tokenOfOwnerByIndex(account, i).call()
-            pinTokenData(id)
             tokenIds.push(+id)
         }))
     }
@@ -93,8 +116,7 @@ const ensureIpfsUriPrefix = (cidOrURI) => {
     return uri
 }
 
-
-// const getImageData = async (imageUrl) => {
+// async function getImageData(imageUrl) {
 //     return await new Promise(async (resolve, reject) => {
 //         await axios.get(imageUrl, {
 //             responseType: 'arraybuffer'
@@ -113,96 +135,96 @@ function stripIpfsUriPrefix(cidOrURI) {
     return cidOrURI
 }
 
-const getIPFS = async (cidOrURI) => {
-    const cid = stripIpfsUriPrefix(cidOrURI)
-    return uint8ArrayConcat(await all(ipfs.cat(cid)))
-}
-const getIPFSString = async (cidOrURI) => {
-    const bytes = await getIPFS(cidOrURI)
-    return uint8ArrayToString(bytes)
-}
+// const getIPFS = async (cidOrURI) => {
+//     const cid = stripIpfsUriPrefix(cidOrURI)
+//     return uint8ArrayConcat(await all(ipfs.cat(cid)))
+// }
+// const getIPFSString = async (cidOrURI) => {
+//     const bytes = await getIPFS(cidOrURI)
+//     return uint8ArrayToString(bytes)
+// }
 
-const getIPFSJSON = async (cidOrURI) => {
-    const str = await getIPFSString(cidOrURI)
-    return JSON.parse(str)
-}
-
-
-function extractCID(cidOrURI) {
-    // remove the ipfs:// prefix, split on '/' and return first path component (root CID)
-    const cidString = stripIpfsUriPrefix(cidOrURI).split('/')[0]
-    return new CID(cidString)
-}
-
-const _configurePinningService = async () => {
-    if (!config.pinningService) {
-        throw new Error(`No pinningService set up in minty config. Unable to pin.`)
-    }
-
-    // check if the service has already been added to js-ipfs
-    for (const svc of await ipfs.pin.remote.service.ls()) {
-        if (svc.service === config.pinningService.name) {
-            // service is already configured, no need to do anything
-            return
-        }
-    }
-
-    // add the service to IPFS
-    const { name, endpoint, key } = config.pinningService
-    if (!name) {
-        throw new Error('No name configured for pinning service')
-    }
-    if (!endpoint) {
-        throw new Error(`No endpoint configured for pinning service ${name}`)
-    }
-    if (!key) {
-        throw new Error(`No key configured for pinning service ${name}.` +
-            `If the config references an environment variable, e.g. '$$PINATA_API_TOKEN', ` +
-            `make sure that the variable is defined.`)
-    }
-    await ipfs.pin.remote.service.add(name, { endpoint, key })
-}
-
-const isPinned = async (cid) => {
-    if (typeof cid === 'string') {
-        cid = new CID(cid)
-    }
-
-    const opts = {
-        service: config.pinningService.name,
-        cid: [cid], // ls expects an array of cids
-    }
-    // eslint-disable-next-line no-unused-vars
-    for await (const _ of ipfs.pin.remote.ls(opts)) {
-        return true
-    }
-    return false
-}
+// const getIPFSJSON = async (cidOrURI) => {
+//     const str = await getIPFSString(cidOrURI)
+//     return JSON.parse(str)
+// }
 
 
-const pin = async (cidOrURI) => {
-    const cid = extractCID(cidOrURI)
+// function extractCID(cidOrURI) {
+//     // remove the ipfs:// prefix, split on '/' and return first path component (root CID)
+//     const cidString = stripIpfsUriPrefix(cidOrURI).split('/')[0]
+//     return new CID(cidString)
+// }
 
-    // Make sure IPFS is set up to use our preferred pinning service.
-    await _configurePinningService()
+// const _configurePinningService = async () => {
+//     if (!config.pinningService) {
+//         throw new Error(`No pinningService set up in minty config. Unable to pin.`)
+//     }
 
-    // Check if we've already pinned this CID to avoid a "duplicate pin" error.
-    const pinned = await isPinned(cid)
-    if (pinned) {
-        return
-    }
+//     // check if the service has already been added to js-ipfs
+//     for (const svc of await ipfs.pin.remote.service.ls()) {
+//         if (svc.service === config.pinningService.name) {
+//             // service is already configured, no need to do anything
+//             return
+//         }
+//     }
 
-    try {
-        // Ask the remote service to pin the content.
-        // Behind the scenes, this will cause the pinning service to connect to our local IPFS node
-        // and fetch the data using Bitswap, IPFS's transfer protocol.
-        await ipfs.pin.remote.add(cid, { service: config.pinningService.name })
-    }
-    catch (error) {
-        console.log(error)
-    }
+//     // add the service to IPFS
+//     const { name, endpoint, key } = config.pinningService
+//     if (!name) {
+//         throw new Error('No name configured for pinning service')
+//     }
+//     if (!endpoint) {
+//         throw new Error(`No endpoint configured for pinning service ${name}`)
+//     }
+//     if (!key) {
+//         throw new Error(`No key configured for pinning service ${name}.` +
+//             `If the config references an environment variable, e.g. '$$PINATA_API_TOKEN', ` +
+//             `make sure that the variable is defined.`)
+//     }
+//     await ipfs.pin.remote.service.add(name, { endpoint, key })
+// }
 
-}
+// const isPinned = async (cid) => {
+//     if (typeof cid === 'string') {
+//         cid = new CID(cid)
+//     }
+
+//     const opts = {
+//         service: config.pinningService.name,
+//         cid: [cid], // ls expects an array of cids
+//     }
+//     // eslint-disable-next-line no-unused-vars
+//     for await (const _ of ipfs.pin.remote.ls(opts)) {
+//         return true
+//     }
+//     return false
+// }
+
+
+// const pin = async (cidOrURI) => {
+//     const cid = extractCID(cidOrURI)
+
+//     // Make sure IPFS is set up to use our preferred pinning service.
+//     await _configurePinningService()
+
+//     // Check if we've already pinned this CID to avoid a "duplicate pin" error.
+//     const pinned = await isPinned(cid)
+//     if (pinned) {
+//         return
+//     }
+
+//     try {
+//         // Ask the remote service to pin the content.
+//         // Behind the scenes, this will cause the pinning service to connect to our local IPFS node
+//         // and fetch the data using Bitswap, IPFS's transfer protocol.
+//         await ipfs.pin.remote.add(cid, { service: config.pinningService.name })
+//     }
+//     catch (error) {
+//         console.log(error)
+//     }
+
+// }
 
 // const pinNFTData = async (tokenId) => {
 //     const { assetURI, metadataURI } = await pinTokenData(tokenId)
@@ -212,11 +234,11 @@ const pin = async (cidOrURI) => {
 
 
 const getNFTMetadata = async (tokenId) => {
-    const metadataURI = stripIpfsUriPrefix(await nftContract.methods.tokenURI(tokenId).call())
+    const nftURI = stripIpfsUriPrefix(await nftContract.methods.tokenURI(tokenId).call())
+    // console.log(metadataURI)
+    // const metadata = await getIPFSJSON(metadataURI)
 
-    const metadata = await getIPFSJSON(metadataURI)
-
-    return { metadataURI, metadata }
+    return { nftURI }
 }
 
 const getTokenOwner = async (tokenId) => {
@@ -265,15 +287,15 @@ const getNFT = async (tokenId) => {
 
     // await transferNFT(tokenId)
 
-    const { metadataURI, metadata } = await getNFTMetadata(tokenId)
+    const { nftURI } = await getNFTMetadata(tokenId)
 
     const ownerAddress = await getTokenOwner(tokenId)
-    const metadataGatewayURL = makeGatewayURL(metadataURI)
-    const nft = { tokenId, metadata, metadataURI, metadataGatewayURL, ownerAddress }
-    if (metadata.image) {
-        nft.assetURI = metadata.image
-        nft.assetGatewayURL = makeGatewayURL(metadata.image)
-    }
+    const nftGatewayURL = makeGatewayURL(nftURI)
+    const nft = { tokenId, nftURI, nftGatewayURL, ownerAddress }
+    // if (metadata.image) {
+    //     nft.assetURI = metadata.image
+    //     nft.assetGatewayURL = makeGatewayURL(metadata.image)
+    // }
 
     // if (fetchCreationInfo) {
     //     nft.creationInfo = await getCreationInfo(tokenId)
@@ -364,30 +386,30 @@ const mintMintyNFT = async (account, tokenURI) => {
 }
 
 
-const makeNFTMetadata = async (assetURI, options) => {
-    assetURI = ensureIpfsUriPrefix(assetURI)
-    options.image = assetURI
-    options.dateMinted = new Date() * 1000
-    return {
-        ...options
-    }
-}
+// const makeNFTMetadata = async (assetURI, options) => {
+//     assetURI = ensureIpfsUriPrefix(assetURI)
+//     options.image = assetURI
+//     options.dateMinted = new Date() * 1000
+//     return {
+//         ...options
+//     }
+// }
 
 
-async function pinTokenData(tokenId) {
-    const { metadata, metadataURI } = await getNFTMetadata(tokenId)
-    const { image: assetURI } = metadata
+// async function pinTokenData(tokenId) {
+//     const { metadata, metadataURI } = await getNFTMetadata(tokenId)
+//     const { image: assetURI } = metadata
 
-    // console.log({ metadata, metadataURI })
+//     // console.log({ metadata, metadataURI })
 
-    console.log(`Pinning asset data (${assetURI}) for token id ${tokenId}....`)
-    pin(assetURI)
+//     console.log(`Pinning asset data (${assetURI}) for token id ${tokenId}....`)
+//     pin(assetURI)
 
-    console.log(`Pinning metadata (${metadataURI}) for token id ${tokenId}...`)
-    pin(metadataURI)
+//     console.log(`Pinning metadata (${metadataURI}) for token id ${tokenId}...`)
+//     pin(metadataURI)
 
-    return { assetURI, metadataURI }
-}
+//     return { assetURI, metadataURI }
+// }
 
 
 export const createNFTFromAssetData = async (data) => {
@@ -403,28 +425,30 @@ export const createNFTFromAssetData = async (data) => {
     // const content = await getImageData(data.image_url)
     // pinTokenData(6)
     delete data['image_url']
-    // const basename = `${data.name.toLowerCase()}.${imageURL.split('.').pop()}`
+    const basename = `${data.name.toLowerCase()}.${imageURL.split('.').pop()}`
 
+    const asset = await getFileFromUrl(imageURL, basename)
     // console.log({ content, basename })
+
+    const { cid: assetCid } = await ipfsAddAsset(asset, data)
 
     // When you add an object to IPFS with a directory prefix in its path,
     // IPFS will create a directory structure for you. This is nice, because
     // it gives us URIs with descriptive filenames in them e.g.
     // 'ipfs://QmaNZ2FCgvBPqnxtkbToVVbK2Nes6xk5K4Ns6BsmkPucAM/cat-pic.png' instead of
     // 'ipfs://QmaNZ2FCgvBPqnxtkbToVVbK2Nes6xk5K4Ns6BsmkPucAM'
-    // const ipfsPath = '/nft/' + basename
     // console.log(content, options)
     // add the asset to IPFS
-    const { cid: assetCid } = await ipfs.add(urlSource(imageURL), ipfsAddOptions)
+    // const { cid: assetCid } = await ipfs.add(urlSource(imageURL), ipfsAddOptions)
 
     // // make the NFT metadata JSON
     const assetURI = ensureIpfsUriPrefix(assetCid)
 
-    const metadata = await makeNFTMetadata(assetURI, data)
+    // const metadata = await makeNFTMetadata(assetURI, data)
 
     // add the metadata to IPFS
-    const { cid: metadataCid } = await ipfs.add({ path: '/nft/metadata.json', content: JSON.stringify(metadata) }, ipfsAddOptions)
-    const metadataURI = ensureIpfsUriPrefix(metadataCid) + '/metadata.json'
+    // const { cid: metadataCid } = await ipfs.add({ path: '/nft/metadata.json', content: JSON.stringify(metadata) }, ipfsAddOptions)
+    // const metadataURI = ensureIpfsUriPrefix(assetCid) + '/metadata.json'
 
     // get the address of the token owner from options, or use the default signing address if no owner is given
     let ownerAddress = await getAccount()
@@ -433,7 +457,7 @@ export const createNFTFromAssetData = async (data) => {
     // // }
 
     // // mint a new token referencing the metadata URI
-    const { hash, tokenId } = await mintMintyNFT(ownerAddress, metadataURI)
+    const { hash, tokenId } = await mintMintyNFT(ownerAddress, assetURI)
 
     // // format and return the results
     return { hash, tokenId }
