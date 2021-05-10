@@ -35,7 +35,7 @@ export const YearSigns = () => {
         // remember: await can only be used within async functions!
         const { data } = await api({
             method: "GET",
-            url: "year/"
+            url: "signs/year/"
         })
         // update local state with the retrieved data
         setYearSigns({ data: data.signs, updated: true, isLoading: false });

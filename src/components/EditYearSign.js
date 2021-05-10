@@ -79,7 +79,7 @@ export const EditYearSign = (props) => {
         // remember: await can only be used within async functions!
         await api({
             method: "GET",
-            url: `/year/${signId}`
+            url: `signs/year/${signId}`
         }).then(data => {
             // update local state with the retrieved data
             getSign(data.data.sign)
@@ -114,7 +114,7 @@ export const EditYearSign = (props) => {
         setLoading(true)
         await api({
             method: "PATCH",
-            url: `/year/${signId}/`,
+            url: `signs/year/${signId}/`,
             data: values
         }).then(data => {
             // update local state with the retrieved data

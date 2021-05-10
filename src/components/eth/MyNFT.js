@@ -1,10 +1,10 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     makeStyles, Container, Typography,
 } from '@material-ui/core';
 // import { SimpleBackdrop } from './common/Loaders'
 import { EthContext } from '../../context/EthContext';
-import { getAccountTokenIds, getAccountTokens, } from './EthAccount';
+import { getAccountTokenIds, getAccountTokens, getConnectedAccount, } from './EthAccount';
 import { SimpleBackdrop } from '../common/Loaders';
 import { NFTTable } from './NFTTable';
 // import LazyLoad from 'react-lazyload';
@@ -30,34 +30,46 @@ const useStyles = makeStyles((theme) => ({
 export const MyNFT = (props) => {
 
     const classes = useStyles();
+    const [ethAccountPresent, setEthAccountPresent] = useState(true)
     const { ethTokenIds, getEthTokenIds, ethTokens, getEthTokens } = useContext(EthContext)
 
     useEffect(() => {
-        if (!ethTokenIds) {
-            getAccountTokenIds().then(tokenIds => getEthTokenIds(tokenIds))
-        }
-        if (ethTokenIds && !ethTokens) {
-            getAccountTokens(ethTokenIds).then(tokens => getEthTokens(tokens))
-        }
+        getConnectedAccount().then(acc => {
+            if (!acc) { setEthAccountPresent(false); return }
+            if (!ethTokenIds) {
+                getAccountTokenIds().then(tokenIds => getEthTokenIds(tokenIds))
+            }
+            if (ethTokenIds && !ethTokens) {
+                getAccountTokens(ethTokenIds).then(tokens => getEthTokens(tokens))
+            }
+        })
     }, [ethTokenIds, ethTokens, getEthTokenIds, getEthTokens])
 
     return (
         <React.Fragment>
 
-            {ethTokens ?
-                <Container maxWidth="md" component="main" className={classes.root}>
-                    <div className={classes.title}>
+            <Container maxWidth="md" component="main" className={classes.root}>
+                {!ethAccountPresent ?
+                    <div>
                         <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
-                            My NFT
-                    </Typography>
+                            You do not have any NFTs
+                        </Typography>
                         <Typography variant="h6" align="center" color="textSecondary" component="p">
-                            Here is a list of your NFT
-                    </Typography>
+                            Click <a href="/" >here</a> to enter your date of birth and mint NFT
+                        </Typography>
                     </div>
-                    {/* {ethTokens && <NFTList tokens={ethTokens} />} */}
-                    {ethTokens && <NFTTable tokens={ethTokens} />}
-                </Container>
-                : <SimpleBackdrop open={true} />}
+                    :
+                    ethTokens ?
+                        <div className={classes.title}>
+                            <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
+                                My NFT
+                            </Typography>
+                            <Typography variant="h6" align="center" color="textSecondary" component="p">
+                                Here is a list of your NFT
+                            </Typography>
+                        </div> : <SimpleBackdrop open={true} />}
+                {ethTokens && <NFTTable tokens={ethTokens} />}
+            </Container>
 
         </React.Fragment>
     );
