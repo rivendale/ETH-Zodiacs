@@ -91,11 +91,10 @@ export default function Header() {
                         Year Signs
                     </Button>
 
-                    {ethAccount &&
-                        <Button href="/my-signs" color="primary" variant="text" className={classes.link}>
-                            My Signs
+                    <Button href="/my-signs" color="primary" variant="text" className={classes.link}>
+                        My Signs
                     </Button>
-                    }
+
 
                     {!ethAccount ?
                         <Button onClick={connectAccount} color="primary" variant="outlined" className={classes.link}>

@@ -77,7 +77,7 @@ export const Home = () => {
         let dateOfBirth = new Date(dob);
         await api({
             method: "GET",
-            url: `query/?year=${dateOfBirth.getFullYear()}&month=${dateOfBirth.getMonth() + 1}&day=${dateOfBirth.getUTCDate() + 1}`
+            url: `signs/query/?year=${dateOfBirth.getFullYear()}&month=${dateOfBirth.getMonth() + 1}&day=${dateOfBirth.getUTCDate() + 1}`
         }).then(data => {
             // update local state with the retrieved data
             getSign(data.data.sign)
@@ -107,7 +107,7 @@ export const Home = () => {
         // let dateOfBirth = new Date(dob);
         await api({
             method: "GET",
-            url: `year/`
+            url: `signs/year/`
         }).then(data => {
             getYearSigns(data.data.signs)
         })

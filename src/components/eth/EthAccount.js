@@ -4,6 +4,7 @@ import { createAlchemyWeb3 } from "@alch/alchemy-web3"
 import contract from "../../artifacts/contracts/Minty.sol/Minty.json"
 // import ipfsHttpClient from 'ipfs-http-client'
 import { NFTStorage } from 'nft.storage'
+import api from '../../api';
 
 
 // import all from 'it-all'
@@ -29,6 +30,45 @@ const nftContract = new web3.eth.Contract(contract.abi, contractAddress);
 // ipfs = ipfsHttpClient(config.ipfsApiUrl)
 
 const client = new NFTStorage({ token: config.IPFS_API_KEY })
+
+
+
+export const verifyMinted = async (signID, address) => {
+
+    let isMinted = true
+    await api({
+        method: "GET",
+        url: `users/verify/${signID}/${address}/`
+    }).then(data => {
+        isMinted = data.data.valid
+    })
+        .catch(err => {
+            if (err.response) {
+                console.log(err.response)
+            } else if (err.request) {
+                console.log(err.request)
+            }
+        })
+    return isMinted
+}
+
+export const ethAction = async (signID, address, action) => {
+    let resp = {}
+    await api({
+        method: "GET",
+        url: `users/${signID}/?address=${address}&action=${action}`
+    }).then(data => {
+        resp = data.data
+    })
+        .catch(err => {
+            if (err.response) {
+                console.log(err.response)
+            } else if (err.request) {
+                console.log(err.request)
+            }
+        })
+    return resp
+}
 
 async function ipfsAddAsset(asset, assetMetadata) {
     // const imgData = await getFileFromUrl(imgUrl, "dragon.png")
@@ -60,9 +100,8 @@ export const getConnectedAccount = async () => {
     const ethBrowserPresent = !!(window.ethereum || window.web3)
     if (ethBrowserPresent) {
         const accounts = await web3.eth.getAccounts()
-        if (accounts[0]) {
-            return accounts[0]
-        }
+        return accounts[0] || null
+
     }
 }
 
@@ -76,7 +115,7 @@ export const getAccount = async () => {
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             // Acccounts now exposed
             const accounts = await web3.eth.getAccounts()
-            return accounts[0]
+            return accounts[0] || null
         } catch (error) {
             console.log(error)
             // User denied account access...
@@ -345,8 +384,6 @@ const sendSignedTransaction = async (data, gasAmount) => {
                     // reject("Something went wrong when submitting your transaction", err)
                 }
             });
-        }).then(data => {
-            console.log({ data })
         }).catch((err) => {
             console.log(" Promise failed:", err);
             reject("Promise failed:", err)

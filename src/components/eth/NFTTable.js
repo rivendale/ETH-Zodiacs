@@ -155,12 +155,12 @@ const EnhancedTableToolbar = (props) => {
 
             {numSelected > 0 ? (
                 <Tooltip title="transfer">
-                    <IconButton aria-label="Transfer">
-                        <Fab variant="extended" style={{ textTransform: "none" }}>
-                            <ShareOutlinedIcon className={classes.extendedIcon} />
+                    {/* <IconButton aria-label="Transfer"> */}
+                    <Fab variant="extended" style={{ width: "70vh", textTransform: "none" }}>
+                        <ShareOutlinedIcon className={classes.extendedIcon} />
                             Transfer NFT(s)
                         </Fab>
-                    </IconButton>
+                    {/* </IconButton> */}
                 </Tooltip>
             ) : (
                 <Tooltip title="Filter list">

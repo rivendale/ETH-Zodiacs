@@ -1,6 +1,6 @@
 
 const Config = {
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || "https://ethsigns.com/api/v1/signs/",
+  BASE_URL: process.env.REACT_APP_API_BASE_URL || "https://ethsigns.com/api/v1/",
   ALCHEMY_API_URL: process.env.REACT_APP_ALCHEMY_API_URL,
   PUBLIC_KEY: process.env.REACT_APP_PUBLIC_KEY,
   PRIVATE_KEY: process.env.REACT_APP_PRIVATE_KEY,
