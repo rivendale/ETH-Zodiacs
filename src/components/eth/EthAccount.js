@@ -33,6 +33,13 @@ const client = new NFTStorage({ token: config.IPFS_API_KEY })
 
 
 
+
+
+export const validateEthAccount = async (address) => {
+    return !web3.utils.isAddress(address)
+}
+
+
 export const verifyMinted = async (signID, address) => {
 
     let isMinted = true
@@ -287,34 +294,40 @@ const getTokenOwner = async (tokenId) => {
 function makeGatewayURL(ipfsURI) {
     return config.ipfsGatewayUrl + '/' + stripIpfsUriPrefix(ipfsURI)
 }
-export const transferToken = async (tokenId, toAddress) => {
-    const fromAddress = await getTokenOwner(tokenId)
+export const transferToken = async (tokenIds, toAddress) => {
 
-    // because the base ERC721 contract has two overloaded versions of the safeTranferFrom function,
-    // we need to refer to it by its fully qualified name.
-    // const tranferFn = contract['safeTransferFrom(address,address,uint256)']
-    console.log({ fromAddress, toAddress })
-    if (fromAddress === toAddress) {
-        console.log("Same TO & From address")
-        return { toAddress, fromAddress, tokenId }
-    }
-    else {
-        nftContract.methods.safeTransferFrom(fromAddress, toAddress, tokenId)
-            .send({
-                from: fromAddress
-            }).once('transactionHash', function (hash) { console.log({ hash }) })
-            .once('receipt', function (receipt) { console.log({ receipt }) })
-            .on('confirmation', function (confNumber, receipt) { console.log({ confNumber, receipt }) })
-            .on('error', function (error) { console.log({ error }) })
-            .then(function (receipt) {
-                const to = receipt.events.Transfer.returnValues.to
-                const tkId = receipt.events.Transfer.tokenId
-                return { to, tkId }
+    let transactionHashes = []
+
+    await Promise.all(tokenIds.map(async (i) => {
+        const fromAddress = await getTokenOwner(i)
+
+        // because the base ERC721 contract has two overloaded versions of the safeTranferFrom function,
+        // we need to refer to it by its fully qualified name.
+        // const tranferFn = contract['safeTransferFrom(address,address,uint256)']
+        if (fromAddress === toAddress) {
+            console.log("Same TO & From address")
+            return { toAddress, fromAddress, i }
+        }
+        else {
+            await new Promise((resolve, reject) => {
+                nftContract.methods.safeTransferFrom(fromAddress, toAddress, i)
+                    .send({
+                        from: fromAddress
+                    }).once('transactionHash', function (hash) { transactionHashes.push(hash); resolve(hash) })
+                    // .once('receipt', function (receipt) { console.log({ receipt }) })
+                    // .on('confirmation', function (confNumber, receipt) { console.log({ confNumber, receipt }) })
+                    .on('error', function (error) { if (error.code === 4001) resolve(); console.log({ error }) })
+                // .then(function (receipt) {
+                //     const to = receipt.events.Transfer.returnValues.to
+                //     const tkId = receipt.events.Transfer.tokenId
+                //     return { to, tkId }
+                // })
             })
-    }
-    const owner = await getTokenOwner(tokenId)
-    // // return await sendSignedTransaction(data)
-    return { owner, fromAddress, tokenId }
+        }
+    }))
+
+    return transactionHashes
+
 }
 
 

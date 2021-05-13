@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
@@ -19,7 +19,11 @@ import Tooltip from '@material-ui/core/Tooltip';
 import ShareOutlinedIcon from '@material-ui/icons/ShareOutlined';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { Fab } from '@material-ui/core';
+import { Fab, Link, List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@material-ui/core';
+import SendIcon from '@material-ui/icons/Send';
+import { TransferNFT } from './TransferNFT';
+import { transferToken, validateEthAccount } from './EthAccount';
+import { EthContext } from '../../context/EthContext';
 
 
 function createData(tokenId, nftURI, nftGatewayURL) {
@@ -83,7 +87,7 @@ function EnhancedTableHead(props) {
                     >
                         <TableSortLabel
                             active={orderBy === headCell.id}
-                            direction={orderBy === headCell.id ? order : 'asc'}
+                            direction={orderBy === headCell.id ? order : 'desc'}
                             onClick={createSortHandler(headCell.id)}
                         >
                             {headCell.label}
@@ -135,7 +139,7 @@ const useToolbarStyles = makeStyles((theme) => ({
 
 const EnhancedTableToolbar = (props) => {
     const classes = useToolbarStyles();
-    const { numSelected } = props;
+    const { numSelected, handleTransfer } = props;
 
     return (
         <Toolbar
@@ -156,7 +160,7 @@ const EnhancedTableToolbar = (props) => {
             {numSelected > 0 ? (
                 <Tooltip title="transfer">
                     {/* <IconButton aria-label="Transfer"> */}
-                    <Fab variant="extended" style={{ width: "70vh", textTransform: "none" }}>
+                    <Fab onClick={handleTransfer} variant="extended" style={{ width: "70vh", textTransform: "none" }}>
                         <ShareOutlinedIcon className={classes.extendedIcon} />
                             Transfer NFT(s)
                         </Fab>
@@ -175,6 +179,7 @@ const EnhancedTableToolbar = (props) => {
 
 EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
+    handleTransfer: PropTypes.func.isRequired,
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -199,22 +204,68 @@ const useStyles = makeStyles((theme) => ({
         top: 20,
         width: 1,
     },
+    listRoot: {
+        width: '100%',
+        backgroundColor: theme.palette.background.paper,
+    },
+    nested: {
+        paddingLeft: theme.spacing(4),
+    },
 }));
 
 export const NFTTable = ({ tokens }) => {
     const classes = useStyles();
+    const { ethAccount } = useContext(EthContext);
     const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('calories');
+    const [orderBy, setOrderBy] = React.useState('tokenId');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [openTransfer, setOpenTransfer] = React.useState(false);
+    const [address, setAddress] = React.useState(null);
+    const [addressError, setAddressError] = React.useState("");
+    const [transactionHashes, setTransactionHashes] = React.useState(null);
+    const [transferLoading, setTransferLoading] = React.useState(false);
 
-    const rows = []
+    var rows = []
     tokens.map(token => (
         rows.push(createData(token.tokenId, token.nftURI, token.nftGatewayURL))
     ))
+    const handleTransfer = () => {
+        setOpenTransfer(!openTransfer);
+    };
 
+    const handleConfirm = (e) => {
+        e.preventDefault()
+        if (!address) { setAddressError("Address is required") }
+        else {
+            setAddress("")
+            setTransferLoading(true)
+            transferToken(selected, address).then(data => {
+                setTransactionHashes(data)
+                setTransferLoading(false)
+                handleTransfer()
+                selected.map(i => (
+                    rows = rows.filter(function (el) { return el.tokenId !== i })
+                ))
+            })
+        }
+    };
+
+
+    const handleChange = ({ target }) => {
+        setAddress(target.value)
+    };
+    useEffect(() => {
+        if (address) {
+            validateEthAccount(address).then(status => {
+                setAddressError(status ? "Enter a valid address" : !status && ethAccount === address ? "You  cannot transfer tokens to yourself" : "")
+            })
+        }
+        else setAddressError("")
+    }, [address, ethAccount])
     const handleRequestSort = (event, property) => {
+        event.preventDefault()
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
@@ -222,8 +273,8 @@ export const NFTTable = ({ tokens }) => {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelecteds = rows.map((n) => n.tokenId);
-            setSelected(newSelecteds);
+            const newSelectedItems = rows.map((n) => n.tokenId);
+            setSelected(newSelectedItems);
             return;
         }
         setSelected([]);
@@ -267,8 +318,40 @@ export const NFTTable = ({ tokens }) => {
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
     return (
         <div className={classes.root}>
+            <TransferNFT
+                open={openTransfer}
+                handleClose={handleTransfer}
+                error={addressError}
+                selected={selected}
+                transferring={transferLoading}
+                handleConfirm={handleConfirm}
+                handleChange={handleChange} />
             <Paper className={classes.paper}>
-                <EnhancedTableToolbar numSelected={selected.length} />
+                {transactionHashes && !!transactionHashes.length && <List
+                    component="nav"
+                    aria-labelledby="nested-list-subheader"
+                    subheader={
+                        <ListSubheader component="div" id="nested-list-subheader">
+                            NFT Transfer in progress. You can view the transaction(s) details on EthScan by clicking the link(s) below
+                        </ListSubheader>
+                    }
+                    className={classes.listRoot}
+                >
+                    {transactionHashes.map(tx => (
+                        <ListItem button key={tx}>
+                            <ListItemIcon>
+                                <SendIcon />
+                            </ListItemIcon>
+                            <ListItemText>
+                                <Link target="_blank" display="block" variant="body1" href={`https://ropsten.etherscan.io/tx/${tx}`}>
+                                    {tx.substr(0, 20) + '...' + tx.substr(tx.length - 20, tx.length)}
+                                </Link>
+                            </ListItemText>
+                        </ListItem>))}
+                </List>}
+                <EnhancedTableToolbar
+                    handleTransfer={handleTransfer}
+                    numSelected={selected.length} />
                 <TableContainer>
                     <Table
                         className={classes.table}
