@@ -225,6 +225,7 @@ export const NFTTable = ({ tokens }) => {
     const [address, setAddress] = React.useState(null);
     const [addressError, setAddressError] = React.useState("");
     const [transactionHashes, setTransactionHashes] = React.useState(null);
+    const [transferError, setTransferError] = React.useState(null);
     const [transferLoading, setTransferLoading] = React.useState(false);
 
     var rows = []
@@ -241,8 +242,9 @@ export const NFTTable = ({ tokens }) => {
         else {
             setAddress("")
             setTransferLoading(true)
-            transferToken(selected, address).then(data => {
-                setTransactionHashes(data)
+            transferToken(selected, address).then(({ transactionHashes: data, errorMessage }) => {
+                if (errorMessage) { setTransferError(errorMessage) }
+                if (!!data.length) { setTransactionHashes(data) }
                 setTransferLoading(false)
                 handleTransfer()
                 selected.map(i => (
@@ -327,6 +329,10 @@ export const NFTTable = ({ tokens }) => {
                 handleConfirm={handleConfirm}
                 handleChange={handleChange} />
             <Paper className={classes.paper}>
+                {transferError &&
+                    <Typography component="h5" variant="h5" align="center" color="textPrimary" gutterBottom>
+                        {transferError}
+                    </Typography>}
                 {transactionHashes && !!transactionHashes.length && <List
                     component="nav"
                     aria-labelledby="nested-list-subheader"

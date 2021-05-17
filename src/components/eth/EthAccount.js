@@ -1,6 +1,6 @@
 import config from '../../config'
 
-import { createAlchemyWeb3 } from "@alch/alchemy-web3"
+// import { createAlchemyWeb3 } from "@alch/alchemy-web3"
 import contract from "../../artifacts/contracts/Minty.sol/Minty.json"
 // import ipfsHttpClient from 'ipfs-http-client'
 import { NFTStorage } from 'nft.storage'
@@ -13,10 +13,10 @@ import api from '../../api';
 // import uint8ArrayToString from 'uint8arrays/to-string'
 // import all from 'it-all'
 // import axios from 'axios'
-const web3 = createAlchemyWeb3(config.ALCHEMY_API_URL);
+// const web3 = createAlchemyWeb3(config.RPC_API_URL);
 const contractAddress = config.CONTRACT_ADDRESS
-// const contractAddress = "0xC11E32173729c5AbF46D6AdC0acb5b66174ea379"
-const nftContract = new web3.eth.Contract(contract.abi, contractAddress);
+// // const contractAddress = "0xC11E32173729c5AbF46D6AdC0acb5b66174ea379"
+// const nftContract = new web3.eth.Contract(contract.abi, contractAddress);
 
 
 // const { urlSource } = ipfsHttpClient
@@ -32,7 +32,11 @@ const nftContract = new web3.eth.Contract(contract.abi, contractAddress);
 const client = new NFTStorage({ token: config.IPFS_API_KEY })
 
 
+const Web3 = require('web3')
 
+const web3 = new Web3(config.RPC_API_URL)
+const nftContract = new web3.eth.Contract(contract.abi, contractAddress);
+// console.log(nftContract)
 
 
 export const validateEthAccount = async (address) => {
@@ -103,41 +107,43 @@ export const ethBrowserPresent = async () => {
 
     return !!(window.ethereum || window.web3)
 }
+
+
+export const getAccount = async (connect = false) => {
+
+    let w3
+    if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
+        if (connect) { await window.ethereum.request({ method: 'eth_requestAccounts' }); }
+        //getting Permission to access
+        w3 = new Web3(window.ethereum);
+        const accounts = await w3.eth.getAccounts()
+        return accounts[0] || null
+
+    } else if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
+        //getting Permission to access
+        if (connect) { window.ethereum.request({ method: 'eth_requestAccounts' }); }
+        w3 = new Web3(window.web3.currentProvider);
+        // In legacy MetaMask acccounts are always exposed
+        const accounts = await w3.eth.getAccounts()
+        return accounts[0] || null
+
+    } else {
+        alert("No MetaMask detected, please install MetaMask first");
+    }
+}
+
 export const getConnectedAccount = async () => {
     const ethBrowserPresent = !!(window.ethereum || window.web3)
     if (ethBrowserPresent) {
-        const accounts = await web3.eth.getAccounts()
-        return accounts[0] || null
-
+        return await getAccount()
     }
 }
 
-
-
-export const getAccount = async () => {
-    if (window.ethereum || window.web3) {
-        window.web3 = web3;
-        try {
-            // Request account access if needed
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            // Acccounts now exposed
-            const accounts = await web3.eth.getAccounts()
-            return accounts[0] || null
-        } catch (error) {
-            console.log(error)
-            // User denied account access...
-        }
-    }
-    else {
-        console.log('Non-Ethereum browser detected. You should consider trying MetaMask!')
-    }
-}
 
 
 export const getAccountTokenIds = async () => {
     const account = await getAccount()
     const balance = await nftContract.methods.balanceOf(account).call()
-    // console.log(balance)
     let tokenIds = []
     if (+balance > 0) {
         const range = [...Array(+balance).keys()];
@@ -149,6 +155,7 @@ export const getAccountTokenIds = async () => {
     }
     return tokenIds
 }
+
 
 const ensureIpfsUriPrefix = (cidOrURI) => {
     let uri = cidOrURI.toString()
@@ -297,9 +304,10 @@ function makeGatewayURL(ipfsURI) {
 export const transferToken = async (tokenIds, toAddress) => {
 
     let transactionHashes = []
-
+    let errorMessage
     await Promise.all(tokenIds.map(async (i) => {
         const fromAddress = await getTokenOwner(i)
+        console.log(fromAddress)
 
         // because the base ERC721 contract has two overloaded versions of the safeTranferFrom function,
         // we need to refer to it by its fully qualified name.
@@ -316,7 +324,7 @@ export const transferToken = async (tokenIds, toAddress) => {
                     }).once('transactionHash', function (hash) { transactionHashes.push(hash); resolve(hash) })
                     // .once('receipt', function (receipt) { console.log({ receipt }) })
                     // .on('confirmation', function (confNumber, receipt) { console.log({ confNumber, receipt }) })
-                    .on('error', function (error) { if (error.code === 4001) resolve(); console.log({ error }) })
+                    .on('error', function (error) { errorMessage = error.message; resolve(); console.log({ error }) })
                 // .then(function (receipt) {
                 //     const to = receipt.events.Transfer.returnValues.to
                 //     const tkId = receipt.events.Transfer.tokenId
@@ -326,7 +334,7 @@ export const transferToken = async (tokenIds, toAddress) => {
         }
     }))
 
-    return transactionHashes
+    return { transactionHashes, errorMessage }
 
 }
 

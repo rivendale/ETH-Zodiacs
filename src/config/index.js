@@ -1,11 +1,12 @@
 
 const Config = {
   BASE_URL: process.env.REACT_APP_API_BASE_URL || "https://ethsigns.com/api/v1/",
-  ALCHEMY_API_URL: process.env.REACT_APP_ALCHEMY_API_URL,
+  RPC_API_URL: process.env.REACT_APP_RPC_API_URL,
   PUBLIC_KEY: process.env.REACT_APP_PUBLIC_KEY,
   PRIVATE_KEY: process.env.REACT_APP_PRIVATE_KEY,
   CONTRACT_ADDRESS: process.env.REACT_APP_CONTRACT_ADDRESS,
   IPFS_API_KEY: process.env.REACT_APP_IPFS_API_KEY,
+  TX_EXPLORER: process.env.REACT_APP_TRANSACTION_EXPLORER,
   // The pinningService config tells minty what remote pinning service to use for pinning the IPFS data for a token.
   // The default config uses Pinata (https://pinata.cloud), and expects a JWT access token in the PINATA_API_TOKEN
   // environment variable.
