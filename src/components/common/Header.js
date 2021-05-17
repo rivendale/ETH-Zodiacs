@@ -69,7 +69,7 @@ export default function Header() {
         if (!ethAccount) {
             const isEthBrowserPresent = await ethBrowserPresent()
             if (isEthBrowserPresent) {
-                const account = await getAccount()
+                const account = await getAccount(true)
                 getEthAccount(account)
             }
             else

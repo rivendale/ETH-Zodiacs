@@ -13,6 +13,7 @@ import Message from './common/MessageDialog';
 import VerifiedUserOutlinedIcon from '@material-ui/icons/VerifiedUserOutlined';
 import DeviceHubOutlinedIcon from '@material-ui/icons/DeviceHubOutlined';
 import { EthContext } from '../context/EthContext';
+import Config from '../config';
 
 const useStyles = makeStyles((theme) => ({
   mainGrid: {
@@ -127,7 +128,7 @@ export const YearSign = ({ history, match }) => {
     ethBrowserPresent().then(status => {
       if (!status) { setEthBrowserError(true); return }
       setMinting(true)
-      getAccount().then(acc => {
+      getAccount(true).then(acc => {
         if (!acc) { setMinting(false); return }
         verifyMinted(sign.id, acc).then((isMinted) => {
           if (isMinted) { setSignAlreadyMinted(true); setMinting(false); return }
@@ -157,8 +158,9 @@ export const YearSign = ({ history, match }) => {
 
   useEffect(() => {
     if (signAlreadyMinted == null)
-      checkMintStatus()
-  })
+      if (ethAccount == null) { setSignAlreadyMinted(false) }
+    checkMintStatus()
+  }, [checkMintStatus, ethAccount, signAlreadyMinted])
   useEffect(() => {
     if (signUpdated) {
       checkMintStatus()
@@ -173,7 +175,7 @@ export const YearSign = ({ history, match }) => {
       {sign && <Container maxWidth="lg" component="main">
         <SignHeader signId={signId} history={history} post={{ title: sign.name, description: sign.description, image: sign.image_url }} />
         {transactionHash && <span>
-          Your transaction is being processed. For more details, click <a rel="noopener noreferrer" href={`https://ropsten.etherscan.io/tx/${transactionHash}`} target="_blank">here</a> can view it on EthScan <br />
+          Your transaction is being processed. For more details, click <a rel="noopener noreferrer" href={`${Config.TX_EXPLORER}/${transactionHash}`} target="_blank">here</a> to view it <br />
           Your minted NFT should be listed in your <a href="/my-signs">NFT page</a> when the transaction completes
         </span>}
         {!transactionHash && sign && sign.day_animal &&
@@ -193,7 +195,7 @@ export const YearSign = ({ history, match }) => {
                     <DeviceHubOutlinedIcon className={classes.extendedIcon} />
                   Mint NFT
                 </Fab>
-                  : !minting ?
+                  : minting ?
                     <div style={{ width: "65%" }}>
                       Minting NFT...
                     <LinearLoader />

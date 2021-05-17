@@ -44,7 +44,6 @@ export const MyNFT = (props) => {
             }
         })
     }, [ethTokenIds, ethTokens, getEthTokenIds, getEthTokens])
-
     return (
         <React.Fragment>
 
@@ -59,7 +58,7 @@ export const MyNFT = (props) => {
                         </Typography>
                     </div>
                     :
-                    ethTokens ?
+                    ethTokens && !!ethTokens.length ?
                         <div className={classes.title}>
                             <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
                                 My NFT
@@ -67,8 +66,18 @@ export const MyNFT = (props) => {
                             <Typography variant="h6" align="center" color="textSecondary" component="p">
                                 Here is a list of your NFT
                             </Typography>
-                        </div> : <SimpleBackdrop open={true} />}
-                {ethTokens && <NFTTable tokens={ethTokens} />}
+                        </div> :
+                        ethTokens && !ethTokens.length ?
+                            <div>
+                                <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
+                                    You do not have any NFTs
+                            </Typography>
+                                <Typography variant="h6" align="center" color="textSecondary" component="p">
+                                    Click <a href="/" >here</a> to enter your date of birth and mint NFT
+                            </Typography>
+                            </div> :
+                            <SimpleBackdrop open={true} />}
+                {ethTokens && !!ethTokens.length && <NFTTable tokens={ethTokens} />}
             </Container>
 
         </React.Fragment>
