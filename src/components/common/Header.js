@@ -96,10 +96,12 @@ export default function Header() {
                     </Button>
 
 
-                    {!ethAccount ?
+                    {accountChecked && !ethAccount &&
                         <Button onClick={connectAccount} color="primary" variant="outlined" className={classes.link}>
                             Connect with Metamask
-                        </Button> :
+                        </Button>
+                    }
+                    {ethAccount &&
                         <Tooltip title={ethAccount}>
                             <Typography variant="body2" noWrap aria-label="deposit-funds">
                                 <EthIcon ethAccount={ethAccount} />

@@ -35,11 +35,11 @@ export const SimpleBackdrop = ({ open }) => {
     const classes = useStyles();
 
     return (
-        <div>
+        <React.Fragment>
             <Backdrop className={classes.backdrop} open={open}>
                 <CircularProgress color="inherit" />
             </Backdrop>
-        </div>
+        </React.Fragment>
     );
 }
 

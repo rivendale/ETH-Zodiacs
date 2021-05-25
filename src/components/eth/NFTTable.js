@@ -24,6 +24,7 @@ import SendIcon from '@material-ui/icons/Send';
 import { TransferNFT } from './TransferNFT';
 import { transferToken, validateEthAccount } from './EthAccount';
 import { EthContext } from '../../context/EthContext';
+import Config from '../../config';
 
 
 function createData(tokenId, nftURI, nftGatewayURL) {
@@ -349,7 +350,7 @@ export const NFTTable = ({ tokens }) => {
                                 <SendIcon />
                             </ListItemIcon>
                             <ListItemText>
-                                <Link target="_blank" display="block" variant="body1" href={`https://ropsten.etherscan.io/tx/${tx}`}>
+                                <Link target="_blank" display="block" variant="body1" href={`${Config.TX_EXPLORER}/${tx}`}>
                                     {tx.substr(0, 20) + '...' + tx.substr(tx.length - 20, tx.length)}
                                 </Link>
                             </ListItemText>

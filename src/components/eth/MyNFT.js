@@ -7,7 +7,6 @@ import { EthContext } from '../../context/EthContext';
 import { getAccountTokenIds, getAccountTokens, getConnectedAccount, } from './EthAccount';
 import { SimpleBackdrop } from '../common/Loaders';
 import { NFTTable } from './NFTTable';
-// import LazyLoad from 'react-lazyload';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -48,7 +47,7 @@ export const MyNFT = (props) => {
         <React.Fragment>
 
             <Container maxWidth="md" component="main" className={classes.root}>
-                {!ethAccountPresent ?
+                {!ethAccountPresent && !ethTokens ?
                     <div>
                         <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
                             You do not have any NFTs

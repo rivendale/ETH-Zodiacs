@@ -156,19 +156,21 @@ export const Home = () => {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} >
                                         <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils}>
-                                            <KeyboardDatePicker
-                                                autoOk={true}
-                                                showTodayButton={true}
-                                                label="Date of Birth"
-                                                variant="outlined"
-                                                required={true}
-                                                fullWidth
-                                                value={selectedDate}
-                                                format="MM-DD-YYYY"
-                                                inputValue={dob}
-                                                onChange={handleChange}
-                                                rifmFormatter={dateFormatter}
-                                            />
+                                            <Grid container justify="space-around">
+                                                <KeyboardDatePicker
+                                                    autoOk={true}
+                                                    showTodayButton={true}
+                                                    label="Date of Birth"
+                                                    variant="outlined"
+                                                    required={true}
+                                                    fullWidth
+                                                    value={selectedDate}
+                                                    format="MM-DD-YYYY"
+                                                    inputValue={dob}
+                                                    onChange={handleChange}
+                                                    rifmFormatter={dateFormatter}
+                                                />
+                                            </Grid>
                                         </MuiPickersUtilsProvider>
                                     </Grid>
 
