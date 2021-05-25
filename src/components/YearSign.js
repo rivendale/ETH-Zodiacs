@@ -14,6 +14,7 @@ import VerifiedUserOutlinedIcon from '@material-ui/icons/VerifiedUserOutlined';
 import DeviceHubOutlinedIcon from '@material-ui/icons/DeviceHubOutlined';
 import { EthContext } from '../context/EthContext';
 import Config from '../config';
+import { AlertMessage } from './common/Alert';
 
 const useStyles = makeStyles((theme) => ({
   mainGrid: {
@@ -46,6 +47,7 @@ export const YearSign = ({ history, match }) => {
   const [transactionHash, setTransactionHash] = useState("");
   const [signUpdated, setSignUpdated] = useState(false);
   const [ethBrowserError, setEthBrowserError] = useState(false)
+  const [mintingError, setMintingError] = useState(null)
   let signId = match.params.signId
 
   const fetchSigns = useCallback(async () => {
@@ -135,7 +137,8 @@ export const YearSign = ({ history, match }) => {
           createNFTFromAssetData(sign).then(data => {
             setMinting(false)
             if (!data) return
-            const { hash } = data
+            const { hash, errorMessage } = data
+            if (errorMessage) { setMintingError(errorMessage); return }
             setTransactionHash(hash)
             ethAction(sign.id, acc, "add")
           })
@@ -143,7 +146,7 @@ export const YearSign = ({ history, match }) => {
       })
     })
   }
-  // console.log(ethAccount, sign)
+  // console.log(mintingError)
   const checkMintStatus = useCallback(() => {
     if (ethAccount && sign) {
       verifyMinted(sign.id, ethAccount).then((isMinted) => {
@@ -155,6 +158,10 @@ export const YearSign = ({ history, match }) => {
     })
 
   }, [ethAccount, sign])
+
+  const handleMessageClick = (() => {
+    setMintingError(null)
+  })
 
   useEffect(() => {
     if (signAlreadyMinted == null)
@@ -178,6 +185,9 @@ export const YearSign = ({ history, match }) => {
           Your transaction is being processed. For more details, click <a rel="noopener noreferrer" href={`${Config.TX_EXPLORER}/${transactionHash}`} target="_blank">here</a> to view it <br />
           Your minted NFT should be listed in your <a href="/my-signs">NFT page</a> when the transaction completes
         </span>}
+        {mintingError &&
+          <AlertMessage message={mintingError} handleMessageClick={handleMessageClick} />
+        }
         {!transactionHash && sign && sign.day_animal &&
           <span>
             {signAlreadyMinted == null ?
@@ -190,7 +200,7 @@ export const YearSign = ({ history, match }) => {
                   <VerifiedUserOutlinedIcon className={classes.extendedIcon} />
                 Minted
               </Fab>
-                : !minting && !signAlreadyMinted ?
+                : !minting && !signAlreadyMinted && !mintingError ?
                   <Fab onClick={handleMintNFT} size="small" disabled={minting} variant="extended" style={{ textTransform: "none" }}>
                     <DeviceHubOutlinedIcon className={classes.extendedIcon} />
                   Mint NFT
