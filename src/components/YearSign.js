@@ -48,6 +48,7 @@ export const YearSign = ({ history, match }) => {
   const [signUpdated, setSignUpdated] = useState(false);
   const [ethBrowserError, setEthBrowserError] = useState(false)
   const [mintingError, setMintingError] = useState(null)
+  const [signHash, setSignHash] = useState(null)
   let signId = match.params.signId
 
   const fetchSigns = useCallback(async () => {
@@ -140,16 +141,16 @@ export const YearSign = ({ history, match }) => {
             const { hash, errorMessage } = data
             if (errorMessage) { setMintingError(errorMessage); return }
             setTransactionHash(hash)
-            ethAction(sign.id, acc, "add")
+            ethAction(signHash, acc, "add")
           })
         })
       })
     })
   }
-  // console.log(mintingError)
   const checkMintStatus = useCallback(() => {
     if (ethAccount && sign) {
-      verifyMinted(sign.id, ethAccount).then((isMinted) => {
+      setSignHash(sign.hash)
+      verifyMinted(sign.hash, ethAccount).then((isMinted) => {
         setSignAlreadyMinted(isMinted)
       })
     }

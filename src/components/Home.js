@@ -40,6 +40,9 @@ const theme = createMuiTheme({
     }
 });
 const useStyles = makeStyles((theme) => ({
+    root: {
+        height: "60vh"
+    },
     paper: {
         marginTop: theme.spacing(8),
         display: "flex",
@@ -145,7 +148,7 @@ export const Home = () => {
             {
                 spinnerOpen === true ?
                     <SimpleBackdrop open={spinnerOpen} /> :
-                    <Container component="main" maxWidth="xs">
+                    <Container component="main" maxWidth="xs" className={classes.root}>
                         <CssBaseline />
                         <div className={classes.paper}>
                             <Avatar className={classes.avatar}></Avatar>
