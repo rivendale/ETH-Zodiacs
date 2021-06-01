@@ -1,7 +1,7 @@
 import config from '../../config'
 
 // import { createAlchemyWeb3 } from "@alch/alchemy-web3"
-import contract from "../../artifacts/contracts/EthZNFT.sol/EthZNFT.json"
+import contract from "../../artifacts/contracts/EthSigns.sol/EthSigns.json"
 // import ipfsHttpClient from 'ipfs-http-client'
 import { NFTStorage } from 'nft.storage'
 import api from '../../api';
@@ -157,7 +157,7 @@ export const getAccount = async (connect = false) => {
 const payMintingFee = async () => {
     const account = await getAccount()
     const nonce = await web3.eth.getTransactionCount(config.PUBLIC_KEY, 'latest')
-    let amountToSend = 100
+    let amountToSend = 400000000000000
     let weiAmount = web3.utils.toWei(amountToSend.toString(), 'wei')
 
     var rawTransaction = {
@@ -167,14 +167,21 @@ const payMintingFee = async () => {
     };
     const gasEstimate = await web3.eth.estimateGas(rawTransaction)
 
+    // const gasPrice = web3.utils.toHex(web3.utils.toWei(gasEstimate.toString(), 'gwei') / 100)
+
     rawTransaction.gasPrice = web3.utils.toHex(web3.utils.toWei(gasEstimate.toString(), 'gwei') / 100)
     rawTransaction.gasLimit = web3.utils.toHex(gasEstimate * 2)
 
     let errorMessage = null
     let transactionHash = null
+    // const me = await nftContract.methods.withdrawFee().send({ from: config.PUBLIC_KEY })
+    // console.log(await nftContract.methods.withdraw().call())
+    // console.log(await nftContract.methods.balance().call({ from: account }))
+    // console.log(await nftContract.methods.setPaymentAddress("0xF174e5BE0320F7389FbE4D19a0B12f71F83D421b").send({ from: "0xF174e5BE0320F7389FbE4D19a0B12f71F83D421b" }))
+
 
     return await new Promise((resolve, _) => {
-        nftContract.methods.payMintingFee().send(rawTransaction)
+        nftContract.methods.sendPayment().send(rawTransaction)
             .once('transactionHash', function (hash) {
                 transactionHash = hash; console.log({ hash });
             })
@@ -192,7 +199,6 @@ const payMintingFee = async () => {
         // })
     })
 }
-
 export const getConnectedAccount = async () => {
     const ethBrowserPresent = !!(window.ethereum || window.web3)
     if (ethBrowserPresent) {
@@ -545,6 +551,7 @@ export const createNFTFromAssetData = async (data) => {
     // const content = await getImageData(data.image_url)
     // pinTokenData(6)
     delete data['image_url']
+    delete data['hash']
     const basename = `${data.name.toLowerCase()}.${imageURL.split('.').pop()}`
 
     const asset = await getFileFromUrl(imageURL, basename)
