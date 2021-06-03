@@ -3,11 +3,13 @@ import {
     makeStyles, Typography, Toolbar, Button, AppBar,
     Link, IconButton, Menu, MenuItem, Avatar, Tooltip,
 } from '@material-ui/core';
+import { useHistory } from 'react-router';
 import { StyledBadge } from './StyledBadge';
 import { ethBrowserPresent, getAccount, getConnectedAccount } from '../eth/EthAccount';
 import { EthContext } from '../../context/EthContext';
 import Message from './MessageDialog';
 import { EthIcon } from './EthIcon';
+import Config from '../../config';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -38,8 +40,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function Header() {
+export default function Header(props) {
     const classes = useStyles();
+    const history = useHistory()
     const { ethAccount, getEthAccount } = useContext(EthContext)
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [ethBrowserError, setEthBrowserError] = useState(false)
@@ -53,7 +56,10 @@ export default function Header() {
     const handleClose = () => {
         setAnchorEl(null);
     };
-
+    const handleRedirect = (to) => {
+        setAnchorEl(null);
+        history.push(to)
+    };
     useEffect(() => {
         if (!accountChecked) {
 
@@ -108,7 +114,7 @@ export default function Header() {
                             </Typography>
                         </Tooltip>
                     }
-                    <div>
+                    {ethAccount && Config.PUBLIC_KEY === ethAccount && <div>
                         <IconButton
                             aria-label="account of current user"
                             aria-controls="menu-appbar"
@@ -143,11 +149,10 @@ export default function Header() {
                             open={open}
                             onClose={handleClose}
                         >
-                            <MenuItem onClick={handleClose}>Profile</MenuItem>
-                            <MenuItem onClick={handleClose}>My account</MenuItem>
+                            <MenuItem onClick={() => handleRedirect("/profile")}>Profile</MenuItem>
                             <MenuItem onClick={handleClose}>Logout</MenuItem>
                         </Menu>
-                    </div>
+                    </div>}
                 </Toolbar>
             </AppBar>
         </React.Fragment >)

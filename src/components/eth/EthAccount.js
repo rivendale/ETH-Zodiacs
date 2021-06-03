@@ -153,6 +153,34 @@ export const getAccount = async (connect = false) => {
     }
 }
 
+export const adminWithdraw = async () => {
+    const account = await getAccount()
+
+    // const { transactionHash } = await nftContract.methods.withdraw().send({ from: account })
+    let transactionHash = null
+    let errorMessage = null
+    await new Promise((resolve, reject) => {
+        nftContract.methods.withdraw().send({ from: account })
+            .once('transactionHash', function (hash) { transactionHash = hash; resolve(hash) })
+            .on('error', function (error) { errorMessage = error.message; resolve(errorMessage); console.log({ error }) })
+
+    })
+
+    return { transactionHash, errorMessage }
+}
+export const getAdminBalance = async () => {
+    const account = await getAccount()
+
+    return await new Promise((resolve, _) => {
+        nftContract.methods.balance().call({ from: account })
+            .then(balance => { resolve(web3.utils.fromWei(balance)) })
+        // .on('error', function (error) { console.log({ error }); resolve("Failed to load balance") })
+    })
+}
+export const getTokenSupply = async () => {
+    await setupWeb3()
+    return await nftContract.methods.totalSupply().call()
+}
 
 const payMintingFee = async () => {
     const account = await getAccount()
