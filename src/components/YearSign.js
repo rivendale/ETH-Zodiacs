@@ -8,13 +8,16 @@ import Sidebar from './Sidebar';
 import { GlobalContext } from "../context/GlobalState";
 import api from '../api';
 import { LinearLoader, Spinner } from './common/Loaders';
-import { getAccount, createNFTFromAssetData, ethBrowserPresent, verifyMinted, ethAction } from './eth/EthAccount';
+import { ethBrowserPresent, getAccount } from './eth/EthAccount';
 import Message from './common/MessageDialog';
 import VerifiedUserOutlinedIcon from '@material-ui/icons/VerifiedUserOutlined';
 import DeviceHubOutlinedIcon from '@material-ui/icons/DeviceHubOutlined';
 import { EthContext } from '../context/EthContext';
 import Config from '../config';
 import { AlertMessage } from './common/Alert';
+import { payMintingFee } from './eth/Escrow';
+import moment from "moment";
+
 
 const useStyles = makeStyles((theme) => ({
   mainGrid: {
@@ -43,12 +46,11 @@ export const YearSign = ({ history, match }) => {
   const [worstCompatibility, setWorstCompatibility] = useState([]);
   const [loading, setLoading] = useState(false);
   const [minting, setMinting] = useState(false);
-  const [signAlreadyMinted, setSignAlreadyMinted] = useState(null);
-  const [transactionHash, setTransactionHash] = useState("");
+  // const [signAlreadyMinted, setSignAlreadyMinted] = useState(null);
+  const [transactionHash, setTransactionHash] = useState(null);
   const [signUpdated, setSignUpdated] = useState(false);
   const [ethBrowserError, setEthBrowserError] = useState(false)
   const [mintingError, setMintingError] = useState(null)
-  const [signHash, setSignHash] = useState(null)
   let signId = match.params.signId
 
   const fetchSigns = useCallback(async () => {
@@ -125,6 +127,38 @@ export const YearSign = ({ history, match }) => {
     setSignUpdated(true)
   }
 
+  const mintSign = useCallback(async (txHash) => {
+    const dob = moment(new Date(localStorage.getItem("dob"))).format('YYYY-MM-DD')
+    const data = {
+      user_address: ethAccount,
+      transaction_hash: txHash,
+      dob,
+      sign_hash: sign.hash
+    }
+    await api({
+      method: "POST",
+      url: `/users/mint/`,
+      data
+    }).then(data => {
+      if (data.status === 200)
+        setMinting(false)
+      setTransactionHash(data.data.sign.transaction_hash)
+      let updatedSign = sign
+      updatedSign.minted = true
+      getSign(updatedSign)
+    })
+      .catch(err => {
+        setMinting(false)
+        if (err.response) {
+          console.log(err.response)
+
+        } else if (err.request) {
+          console.log(err.request)
+        }
+      })
+  }, [ethAccount, getSign, sign])
+  // mintSign(0xa25061443b9c7a9ac089c3b276aecb5759c4f5f49c993cc053b6f5fc62934ba3)
+
   const handleMintNFT = (e) => {
     e.preventDefault()
     setEthBrowserError(false)
@@ -133,50 +167,45 @@ export const YearSign = ({ history, match }) => {
       setMinting(true)
       getAccount(true).then(acc => {
         if (!acc) { setMinting(false); return }
-        verifyMinted(sign.id, acc).then((isMinted) => {
-          if (isMinted) { setSignAlreadyMinted(true); setMinting(false); return }
-          createNFTFromAssetData(sign).then(data => {
-            setMinting(false)
-            if (!data) return
-            const { hash, errorMessage } = data
-            if (errorMessage) { setMintingError(errorMessage); return }
-            setTransactionHash(hash)
-            ethAction(signHash, acc, "add")
-          })
+        payMintingFee().then(data => {
+          if (!data) { setMinting(false); return }
+          const { transactionHash, errorMessage } = data
+          if (errorMessage) { setMintingError(errorMessage); setMinting(false); return }
+          else { mintSign(transactionHash) }
         })
       })
     })
   }
-  const checkMintStatus = useCallback(() => {
-    if (ethAccount && sign) {
-      setSignHash(sign.hash)
-      verifyMinted(sign.hash, ethAccount).then((isMinted) => {
-        setSignAlreadyMinted(isMinted)
-      })
-    }
-    ethBrowserPresent().then(status => {
-      if (!status) { setSignAlreadyMinted(false) }
-    })
+  // const checkMintStatus = useCallback(() => {
+  //   if (ethAccount && sign) {
+  //     verifyMinted(sign.hash, ethAccount).then((isMinted) => {
+  //       setSignAlreadyMinted(isMinted)
+  //     })
+  //   }
+  //   ethBrowserPresent().then(status => {
+  //     if (!status) { setSignAlreadyMinted(false) }
+  //   })
 
-  }, [ethAccount, sign])
+  // }, [ethAccount, sign])
 
   const handleMessageClick = (() => {
     setMintingError(null)
   })
 
-  useEffect(() => {
-    if (signAlreadyMinted == null)
-      if (ethAccount == null) { setSignAlreadyMinted(false) }
-    checkMintStatus()
-  }, [checkMintStatus, ethAccount, signAlreadyMinted])
+  // useEffect(() => {
+  //   if (sign && !sign.minted)
+  //     if (ethAccount) {
+  //       checkMintStatus()
+  //     }
+  // }, [checkMintStatus, ethAccount, sign, signAlreadyMinted])
   useEffect(() => {
     if (signUpdated) {
-      checkMintStatus()
+      // checkMintStatus()
       if (sign && !!Object.keys(yearSigns).length) {
         getCompatibility()
       }
     }
-  }, [checkMintStatus, getCompatibility, sign, signUpdated, yearSigns])
+  }, [getCompatibility, sign, signUpdated, yearSigns])
   return (
     <React.Fragment>
       {ethBrowserError && <Message />}
@@ -191,27 +220,22 @@ export const YearSign = ({ history, match }) => {
         }
         {!transactionHash && sign && sign.day_animal &&
           <span>
-            {signAlreadyMinted == null ?
-              <span >
-                Loading Status...
-              </span>
-              :
-              signAlreadyMinted ?
-                <Fab size="small" variant="extended" className={classes.mintedIcon} >
-                  <VerifiedUserOutlinedIcon className={classes.extendedIcon} />
+            {sign.minted ?
+              <Fab size="small" variant="extended" className={classes.mintedIcon} >
+                <VerifiedUserOutlinedIcon className={classes.extendedIcon} />
                 Minted
               </Fab>
-                : !minting && !signAlreadyMinted && !mintingError ?
-                  <Fab onClick={handleMintNFT} size="small" disabled={minting} variant="extended" style={{ textTransform: "none" }}>
-                    <DeviceHubOutlinedIcon className={classes.extendedIcon} />
+              : !minting && !mintingError ?
+                <Fab onClick={handleMintNFT} size="small" disabled={minting} variant="extended" style={{ textTransform: "none" }}>
+                  <DeviceHubOutlinedIcon className={classes.extendedIcon} />
                   Mint NFT
                 </Fab>
-                  : minting ?
-                    <div style={{ width: "65%" }}>
-                      Minting NFT...
+                : minting ?
+                  <div style={{ width: "65%" }}>
+                    Minting NFT...
                     <LinearLoader />
-                    </div>
-                    : ""
+                  </div>
+                  : ""
             }
           </span>}
 

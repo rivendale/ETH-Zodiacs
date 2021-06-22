@@ -26,6 +26,7 @@ yarn-error.log*
 
 # Env
 .env
+.env.prod
 
 # Eth
 ipfs/

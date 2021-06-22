@@ -1,13 +1,9 @@
 import config from '../../config'
 
 import contract from "../../artifacts/contracts/EthSignsEscrow.sol/EthSignsEscrow.json"
-import api from '../../api';
 import Web3Modal from "web3modal";
 import Web3 from "web3";
-
 const contractAddress = config.CONTRACT_ADDRESS
-
-
 let web3
 let nftContract
 
@@ -32,47 +28,6 @@ const setupWeb3 = async () => {
 }
 
 
-export const validateEthAccount = async (address) => {
-    return !web3.utils.isAddress(address)
-}
-
-
-export const verifyMinted = async (signID, address) => {
-
-    let isMinted = true
-    await api({
-        method: "GET",
-        url: `users/verify/${signID}/${address}/`
-    }).then(data => {
-        isMinted = data.data.valid
-    })
-        .catch(err => {
-            if (err.response) {
-                console.log(err.response)
-            } else if (err.request) {
-                console.log(err.request)
-            }
-        })
-    return isMinted
-}
-
-export const ethAction = async (signID, address, action) => {
-    let resp = {}
-    await api({
-        method: "GET",
-        url: `users/${signID}/?address=${address}&action=${action}`
-    }).then(data => {
-        resp = data.data
-    })
-        .catch(err => {
-            if (err.response) {
-                console.log(err.response)
-            } else if (err.request) {
-                console.log(err.request)
-            }
-        })
-    return resp
-}
 
 
 export const ethBrowserPresent = async () => {
@@ -132,27 +87,47 @@ export const getTokenSupply = async () => {
     return await nftContract.methods.totalSupply().call()
 }
 
-
-export const getConnectedAccount = async () => {
-    const ethBrowserPresent = !!(window.ethereum || window.web3)
-    if (ethBrowserPresent) {
-        return await getAccount()
-    }
-}
-
-
-
-export const getAccountTokenIds = async () => {
+export const payMintingFee = async () => {
     const account = await getAccount()
-    const balance = await nftContract.methods.balanceOf(account).call()
-    let tokenIds = []
-    if (+balance > 0) {
-        const range = [...Array(+balance).keys()];
+    const nonce = await web3.eth.getTransactionCount(config.PUBLIC_KEY, 'latest')
+    let amountToSend = 400000000000000
+    let weiAmount = web3.utils.toWei(amountToSend.toString(), 'wei')
 
-        await Promise.all(range.map(async (i) => {
-            const id = await nftContract.methods.tokenOfOwnerByIndex(account, i).call()
-            tokenIds.push(+id)
-        }))
-    }
-    return tokenIds
+    var rawTransaction = {
+        "from": account,
+        "nonce": web3.utils.toHex(nonce),
+        "value": weiAmount,
+    };
+
+    let errorMessage = null
+    let transactionHash = null
+
+    return await new Promise((resolve, _) => {
+
+        nftContract.methods.sendPayment().estimateGas({ from: account })
+            .then(function (gasAmount) {
+                rawTransaction.gasPrice = web3.utils.toHex(gasAmount * 800000)
+                rawTransaction.gasLimit = web3.utils.toHex(gasAmount * 2)
+
+                nftContract.methods.sendPayment().send(rawTransaction)
+                    .once('transactionHash', function (hash) {
+                        transactionHash = hash; console.log({ hash });
+                    })
+                    .once('receipt', function (receipt) {
+                        console.log({ receipt });
+                        transactionHash = receipt.transactionHash;
+                        resolve({ transactionHash })
+                    })
+                    .on('error', function (error) { errorMessage = error.message; console.log({ error }); resolve({ errorMessage }) })
+
+            })
+            .catch(function (error) {
+                errorMessage = error.message;
+                console.log({ error });
+                resolve({ errorMessage })
+
+            })
+    })
+
 }
+

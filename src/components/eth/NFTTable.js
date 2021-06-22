@@ -22,7 +22,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fab, Link, List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@material-ui/core';
 import SendIcon from '@material-ui/icons/Send';
 import { TransferNFT } from './TransferNFT';
-import { transferToken, validateEthAccount } from './EthAccount';
+import { validateEthAccount } from './EthAccount';
 import { EthContext } from '../../context/EthContext';
 import Config from '../../config';
 
@@ -225,14 +225,15 @@ export const NFTTable = ({ tokens }) => {
     const [openTransfer, setOpenTransfer] = React.useState(false);
     const [address, setAddress] = React.useState(null);
     const [addressError, setAddressError] = React.useState("");
-    const [transactionHashes, setTransactionHashes] = React.useState(null);
-    const [transferError, setTransferError] = React.useState(null);
+    const [transactionHashes] = React.useState(null);
+    const [transferError] = React.useState(null);
     const [transferLoading, setTransferLoading] = React.useState(false);
 
     var rows = []
-    tokens.map(token => (
-        rows.push(createData(token.tokenId, token.nftURI, token.nftGatewayURL))
-    ))
+    for (const [key, value] of Object.entries(tokens)) {
+        rows.push(createData(key, value, value))
+
+    }
     const handleTransfer = () => {
         setOpenTransfer(!openTransfer);
     };
@@ -243,15 +244,15 @@ export const NFTTable = ({ tokens }) => {
         else {
             setAddress("")
             setTransferLoading(true)
-            transferToken(selected, address).then(({ transactionHashes: data, errorMessage }) => {
-                if (errorMessage) { setTransferError(errorMessage) }
-                if (!!data.length) { setTransactionHashes(data) }
-                setTransferLoading(false)
-                handleTransfer()
-                selected.map(i => (
-                    rows = rows.filter(function (el) { return el.tokenId !== i })
-                ))
-            })
+            // transferToken(selected, address).then(({ transactionHashes: data, errorMessage }) => {
+            //     if (errorMessage) { setTransferError(errorMessage) }
+            //     if (!!data.length) { setTransactionHashes(data) }
+            //     setTransferLoading(false)
+            //     handleTransfer()
+            //     selected.map(i => (
+            //         rows = rows.filter(function (el) { return el.tokenId !== i })
+            //     ))
+            // })
         }
     };
 

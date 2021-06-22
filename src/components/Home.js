@@ -68,6 +68,7 @@ export const Home = () => {
     const [dob, setDob] = useState(moment().format("MM-DD-YYYY"));
     const [open, setOpen] = useState(false);
     const [spinnerOpen, setSpinnerOpen] = useState(false);
+    const [signsFetched, setSignsFetched] = useState(false);
 
 
     const history = useHistory()
@@ -85,12 +86,12 @@ export const Home = () => {
             // update local state with the retrieved data
             getSign(data.data.sign)
             localStorage.setItem("sign", JSON.stringify(data.data.sign))
+            localStorage.setItem("dob", dob)
             setSpinnerOpen(false)
             history.push({
                 pathname: `/zodiac-sign/${data.data.sign.id}`,
                 state: { userSign: data.data.sign }
             })
-            // setOpen(true);
         })
             .catch(err => {
                 if (err.response) {
@@ -106,15 +107,16 @@ export const Home = () => {
     const fetchSigns = async () => {
         // use the await keyword to grab the resolved promise value
         // remember: await can only be used within async functions!
-        // setSpinnerOpen(true)
-        // let dateOfBirth = new Date(dob);
         await api({
             method: "GET",
             url: `signs/year/`
         }).then(data => {
             getYearSigns(data.data.signs)
+            setSignsFetched(true)
         })
             .catch(err => {
+                setSignsFetched(true)
+
                 if (err.response) {
                     console.log(err.response)
                 } else if (err.request) {
@@ -123,7 +125,7 @@ export const Home = () => {
             })
     }
     useEffect(() => {
-        if (!yearSigns.length) {
+        if (!yearSigns.length && !signsFetched) {
             fetchSigns()
         }
     })

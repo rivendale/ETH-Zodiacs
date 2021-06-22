@@ -1,12 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
     makeStyles, Container, Typography,
 } from '@material-ui/core';
 // import { SimpleBackdrop } from './common/Loaders'
 import { EthContext } from '../../context/EthContext';
-import { getAccountTokenIds, getAccountTokens, getConnectedAccount, } from './EthAccount';
+import { getConnectedAccount, } from './EthAccount';
 import { SimpleBackdrop } from '../common/Loaders';
 import { NFTTable } from './NFTTable';
+import api from '../../api';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -30,22 +31,40 @@ export const MyNFT = (props) => {
 
     const classes = useStyles();
     const [ethAccountPresent, setEthAccountPresent] = useState(true)
-    const { ethTokenIds, getEthTokenIds, ethTokens, getEthTokens } = useContext(EthContext)
+    const { ethTokens, getEthTokens } = useContext(EthContext)
+    const [loading, setLoading] = useState(null);
+
+    const fetchSigns = useCallback(async (acc) => {
+        setLoading(true)
+        await api({
+            method: "GET",
+            url: `users/tokens/${acc}`
+        }).then(data => {
+            getEthTokens(data.data)
+            //   setSignUpdated(true)
+            setLoading(false)
+        })
+            .catch(err => {
+                setLoading(false)
+                if (err.response) {
+                    console.log(err.response)
+                } else if (err.request) {
+                    console.log(err.request)
+                }
+            })
+    }, [getEthTokens])
+
 
     useEffect(() => {
+        if (loading !== null) { return }
         getConnectedAccount().then(acc => {
             if (!acc) { setEthAccountPresent(false); return }
-            if (!ethTokenIds) {
-                getAccountTokenIds().then(tokenIds => getEthTokenIds(tokenIds))
-            }
-            if (ethTokenIds && !ethTokens) {
-                getAccountTokens(ethTokenIds).then(tokens => getEthTokens(tokens))
-            }
+            fetchSigns(acc)
         })
-    }, [ethTokenIds, ethTokens, getEthTokenIds, getEthTokens])
+    }, [fetchSigns, loading])
     return (
         <React.Fragment>
-
+            {!ethTokens && loading === true && <SimpleBackdrop open={true} />}
             <Container maxWidth="md" component="main" className={classes.root}>
                 {!ethAccountPresent && !ethTokens ?
                     <div>
@@ -57,7 +76,7 @@ export const MyNFT = (props) => {
                         </Typography>
                     </div>
                     :
-                    ethTokens && !!ethTokens.length ?
+                    ethTokens ?
                         <div className={classes.title}>
                             <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
                                 My NFT
@@ -66,17 +85,16 @@ export const MyNFT = (props) => {
                                 Here is a list of your NFT
                             </Typography>
                         </div> :
-                        ethTokens && !ethTokens.length ?
-                            <div>
-                                <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
-                                    You do not have any NFTs
+                        // ethTokens && !ethTokens.length ?
+                        <div>
+                            <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
+                                You do not have any NFTs
                             </Typography>
-                                <Typography variant="h6" align="center" color="textSecondary" component="p">
-                                    Click <a href="/" >here</a> to enter your date of birth and mint NFT
+                            <Typography variant="h6" align="center" color="textSecondary" component="p">
+                                Click <a href="/" >here</a> to enter your date of birth and mint NFT
                             </Typography>
-                            </div> :
-                            <SimpleBackdrop open={true} />}
-                {ethTokens && !!ethTokens.length && <NFTTable tokens={ethTokens} />}
+                        </div>}
+                {ethTokens && <NFTTable tokens={ethTokens} />}
             </Container>
 
         </React.Fragment>
