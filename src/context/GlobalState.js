@@ -35,6 +35,7 @@ export const GlobalProvider = ({ children }) => {
         });
     }
     function getSign(data) {
+        localStorage.setItem("sign", JSON.stringify(data))
         dispatch({
             type: "GET_ZODIAC_SIGN",
             payload: data
