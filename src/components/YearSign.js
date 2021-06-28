@@ -8,14 +8,13 @@ import Sidebar from './Sidebar';
 import { GlobalContext } from "../context/GlobalState";
 import api from '../api';
 import { LinearLoader, Spinner } from './common/Loaders';
-import { ethBrowserPresent, getAccount } from './eth/EthAccount';
+import { ethBrowserPresent, getAccount, payMintingFee, verifyMinted } from './eth/EthAccount';
 import Message from './common/MessageDialog';
 import VerifiedUserOutlinedIcon from '@material-ui/icons/VerifiedUserOutlined';
 import DeviceHubOutlinedIcon from '@material-ui/icons/DeviceHubOutlined';
 import { EthContext } from '../context/EthContext';
 import Config from '../config';
 import { AlertMessage } from './common/Alert';
-import { payMintingFee } from './eth/Escrow';
 import moment from "moment";
 
 
@@ -46,7 +45,7 @@ export const YearSign = ({ history, match }) => {
   const [worstCompatibility, setWorstCompatibility] = useState([]);
   const [loading, setLoading] = useState(false);
   const [minting, setMinting] = useState(false);
-  // const [signAlreadyMinted, setSignAlreadyMinted] = useState(null);
+  const [signCheckedMinted, setSignCheckedMinted] = useState(false);
   const [transactionHash, setTransactionHash] = useState(null);
   const [signUpdated, setSignUpdated] = useState(false);
   const [ethBrowserError, setEthBrowserError] = useState(false)
@@ -157,7 +156,6 @@ export const YearSign = ({ history, match }) => {
         }
       })
   }, [ethAccount, getSign, sign])
-  // mintSign(0xa25061443b9c7a9ac089c3b276aecb5759c4f5f49c993cc053b6f5fc62934ba3)
 
   const handleMintNFT = (e) => {
     e.preventDefault()
@@ -167,7 +165,7 @@ export const YearSign = ({ history, match }) => {
       setMinting(true)
       getAccount(true).then(acc => {
         if (!acc) { setMinting(false); return }
-        payMintingFee().then(data => {
+        payMintingFee({ amountToSend: sign.minting_fee }).then(data => {
           if (!data) { setMinting(false); return }
           const { transactionHash, errorMessage } = data
           if (errorMessage) { setMintingError(errorMessage); setMinting(false); return }
@@ -176,31 +174,25 @@ export const YearSign = ({ history, match }) => {
       })
     })
   }
-  // const checkMintStatus = useCallback(() => {
-  //   if (ethAccount && sign) {
-  //     verifyMinted(sign.hash, ethAccount).then((isMinted) => {
-  //       setSignAlreadyMinted(isMinted)
-  //     })
-  //   }
-  //   ethBrowserPresent().then(status => {
-  //     if (!status) { setSignAlreadyMinted(false) }
-  //   })
-
-  // }, [ethAccount, sign])
+  useEffect(() => {
+    if (ethAccount && sign) {
+      if (!sign.minted && !signCheckedMinted) {
+        verifyMinted(sign.hash, ethAccount).then((isMinted) => {
+          let updatedSign = sign
+          updatedSign.minted = isMinted
+          getSign(updatedSign)
+          setSignCheckedMinted(true)
+        })
+      }
+    }
+  }, [ethAccount, getSign, sign, signCheckedMinted])
 
   const handleMessageClick = (() => {
     setMintingError(null)
   })
 
-  // useEffect(() => {
-  //   if (sign && !sign.minted)
-  //     if (ethAccount) {
-  //       checkMintStatus()
-  //     }
-  // }, [checkMintStatus, ethAccount, sign, signAlreadyMinted])
   useEffect(() => {
     if (signUpdated) {
-      // checkMintStatus()
       if (sign && !!Object.keys(yearSigns).length) {
         getCompatibility()
       }
@@ -213,7 +205,7 @@ export const YearSign = ({ history, match }) => {
         <SignHeader signId={signId} history={history} post={{ title: sign.name, description: sign.description, image: sign.image_url }} />
         {transactionHash && <span>
           Your transaction is being processed. For more details, click <a rel="noopener noreferrer" href={`${Config.TX_EXPLORER}/${transactionHash}`} target="_blank">here</a> to view it <br />
-          Your minted NFT should be listed in your <a href="/my-signs">NFT page</a> when the transaction completes
+          Your minted NFT should be listed in your <a href="/my-signs">NFT page</a> within 5 minutes of the transaction completion.
         </span>}
         {mintingError &&
           <AlertMessage message={mintingError} handleMessageClick={handleMessageClick} />

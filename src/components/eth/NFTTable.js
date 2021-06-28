@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
@@ -22,7 +22,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fab, Link, List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@material-ui/core';
 import SendIcon from '@material-ui/icons/Send';
 import { TransferNFT } from './TransferNFT';
-import { validateEthAccount } from './EthAccount';
+import { transferToken, validateEthAccount } from './EthAccount';
 import { EthContext } from '../../context/EthContext';
 import Config from '../../config';
 
@@ -223,17 +223,34 @@ export const NFTTable = ({ tokens }) => {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [openTransfer, setOpenTransfer] = React.useState(false);
+    const [tokenRows, setTokenRows] = React.useState([]);
+    const [tokensFetched, setTokensFetched] = React.useState(false);
     const [address, setAddress] = React.useState(null);
     const [addressError, setAddressError] = React.useState("");
-    const [transactionHashes] = React.useState(null);
-    const [transferError] = React.useState(null);
+    const [transactionHashes, setTransactionHashes] = React.useState(null);
+    const [transferError, setTransferError] = React.useState(null);
     const [transferLoading, setTransferLoading] = React.useState(false);
 
-    var rows = []
-    for (const [key, value] of Object.entries(tokens)) {
-        rows.push(createData(key, value, value))
+    // var rows = []
+    // for (const [key, value] of Object.entries(tokens)) {
+    //     rows.push(createData(key, value, value))
+    // }
+    useEffect(() => {
+        if (!tokensFetched) {
+            for (const [key, value] of Object.entries(tokens)) {
+                setTokenRows(tokenRows => [...tokenRows, createData(key, value, value)])
+            }
+            setTokensFetched(true)
+        }
+    }, [tokens, tokenRows, tokensFetched])
+    const resetRows = useCallback(() => {
+        let rows = tokenRows.filter(function (obj) {
+            return !selected.includes(obj.tokenId)
+        });
+        setTokenRows(rows)
+        setSelected([0])
+    }, [selected, tokenRows])
 
-    }
     const handleTransfer = () => {
         setOpenTransfer(!openTransfer);
     };
@@ -244,18 +261,17 @@ export const NFTTable = ({ tokens }) => {
         else {
             setAddress("")
             setTransferLoading(true)
-            // transferToken(selected, address).then(({ transactionHashes: data, errorMessage }) => {
-            //     if (errorMessage) { setTransferError(errorMessage) }
-            //     if (!!data.length) { setTransactionHashes(data) }
-            //     setTransferLoading(false)
-            //     handleTransfer()
-            //     selected.map(i => (
-            //         rows = rows.filter(function (el) { return el.tokenId !== i })
-            //     ))
-            // })
+            transferToken(selected, address).then(({ transactionHashes: data, errorMessage }) => {
+                if (errorMessage) { setTransferError(errorMessage) }
+                if (!!data.length) {
+                    setTransactionHashes(data)
+                    resetRows()
+                }
+                setTransferLoading(false)
+                handleTransfer()
+            })
         }
     };
-
 
     const handleChange = ({ target }) => {
         setAddress(target.value)
@@ -277,7 +293,7 @@ export const NFTTable = ({ tokens }) => {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelectedItems = rows.map((n) => n.tokenId);
+            const newSelectedItems = tokenRows.map((n) => n.tokenId);
             setSelected(newSelectedItems);
             return;
         }
@@ -319,7 +335,7 @@ export const NFTTable = ({ tokens }) => {
 
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, tokenRows.length - page * rowsPerPage);
     return (
         <div className={classes.root}>
             <TransferNFT
@@ -374,10 +390,10 @@ export const NFTTable = ({ tokens }) => {
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
                             onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
+                            rowCount={tokenRows.length}
                         />
                         <TableBody>
-                            {stableSort(rows, getComparator(order, orderBy))
+                            {stableSort(tokenRows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row) => {
                                     const isItemSelected = isSelected(row.tokenId);
@@ -424,7 +440,7 @@ export const NFTTable = ({ tokens }) => {
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={rows.length}
+                    count={tokenRows.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onChangePage={handleChangePage}

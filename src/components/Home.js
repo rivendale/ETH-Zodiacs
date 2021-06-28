@@ -21,6 +21,7 @@ import { SignModal } from "./SignModal";
 import MomentUtils from "@date-io/moment";
 import moment from "moment";
 import { SimpleBackdrop } from './common/Loaders';
+import { EthContext } from "../context/EthContext";
 
 
 const theme = createMuiTheme({
@@ -64,12 +65,13 @@ const useStyles = makeStyles((theme) => ({
 export const Home = () => {
     const classes = useStyles(theme);
     const { getSign, sign, yearSigns, getYearSigns } = useContext(GlobalContext);
+    const { ethAccount } = useContext(EthContext);
     const [selectedDate, setDate] = useState(moment());
     const [dob, setDob] = useState(moment().format("MM-DD-YYYY"));
     const [open, setOpen] = useState(false);
+    const [error, setError] = useState(false);
     const [spinnerOpen, setSpinnerOpen] = useState(false);
     const [signsFetched, setSignsFetched] = useState(false);
-
 
     const history = useHistory()
 
@@ -79,9 +81,10 @@ export const Home = () => {
         // remember: await can only be used within async functions!
         setSpinnerOpen(true)
         let dateOfBirth = new Date(dob);
+        let ethAcc = ethAccount || ""
         await api({
             method: "GET",
-            url: `signs/query/?year=${dateOfBirth.getFullYear()}&month=${dateOfBirth.getMonth() + 1}&day=${dateOfBirth.getUTCDate() + 1}`
+            url: `signs/query/?year=${dateOfBirth.getFullYear()}&month=${dateOfBirth.getMonth() + 1}&day=${dateOfBirth.getUTCDate() + 1}&address=${ethAcc}`
         }).then(data => {
             // update local state with the retrieved data
             getSign(data.data.sign)
@@ -163,17 +166,21 @@ export const Home = () => {
                                         <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils}>
                                             <Grid container justify="space-around">
                                                 <KeyboardDatePicker
-                                                    autoOk={true}
-                                                    showTodayButton={true}
+                                                    autoOk
+                                                    showTodayButton
+                                                    animateYearScrolling
                                                     label="Date of Birth"
                                                     variant="outlined"
-                                                    required={true}
+                                                    required
                                                     fullWidth
                                                     value={selectedDate}
                                                     format="MM-DD-YYYY"
+                                                    placeholder="MM-DD-YYYY"
                                                     inputValue={dob}
                                                     onChange={handleChange}
                                                     rifmFormatter={dateFormatter}
+                                                    disableFuture
+                                                    onError={(e) => (setError(!!e))}
                                                 />
                                             </Grid>
                                         </MuiPickersUtilsProvider>
@@ -186,6 +193,7 @@ export const Home = () => {
                                     variant="contained"
                                     color="primary"
                                     className={classes.submit}
+                                    disabled={error}
                                 >
                                     Get Sign
                         </Button>
