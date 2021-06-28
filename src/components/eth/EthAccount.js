@@ -1,12 +1,11 @@
 import config from '../../config'
 
-import contract from "../../artifacts/contracts/EthSignsEscrow.sol/EthSignsEscrow.json"
+import contract from "../../artifacts/contracts/EthsignsToken/EthsignsToken.json"
 import api from '../../api';
 import Web3Modal from "web3modal";
 import Web3 from "web3";
 
 const contractAddress = config.CONTRACT_ADDRESS
-
 
 let web3
 let nftContract
@@ -33,6 +32,7 @@ const setupWeb3 = async () => {
 
 
 export const validateEthAccount = async (address) => {
+    await setupWeb3(true)
     return !web3.utils.isAddress(address)
 }
 
@@ -142,17 +142,89 @@ export const getConnectedAccount = async () => {
 
 
 
-export const getAccountTokenIds = async () => {
-    const account = await getAccount()
-    const balance = await nftContract.methods.balanceOf(account).call()
-    let tokenIds = []
-    if (+balance > 0) {
-        const range = [...Array(+balance).keys()];
 
-        await Promise.all(range.map(async (i) => {
-            const id = await nftContract.methods.tokenOfOwnerByIndex(account, i).call()
-            tokenIds.push(+id)
-        }))
-    }
-    return tokenIds
+const getTokenOwner = async (tokenId) => {
+    return nftContract.methods.ownerOf(tokenId).call()
+}
+
+export const payMintingFee = async ({ amountToSend }) => {
+    const account = await getAccount()
+    const nonce = await web3.eth.getTransactionCount(config.PUBLIC_KEY, 'latest')
+
+    let weiAmount = web3.utils.toWei(amountToSend.toString(), 'wei')
+
+    var rawTransaction = {
+        "from": account,
+        "nonce": web3.utils.toHex(nonce),
+        "value": weiAmount,
+    };
+
+    let errorMessage = null
+    let transactionHash = null
+
+    return await new Promise((resolve, _) => {
+
+        nftContract.methods.sendPayment().estimateGas({ from: account })
+            .then(function (gasAmount) {
+                rawTransaction.gasPrice = web3.utils.toHex(gasAmount * 800000)
+                rawTransaction.gasLimit = web3.utils.toHex(gasAmount * 2)
+
+                nftContract.methods.sendPayment().send(rawTransaction)
+                    .once('transactionHash', function (hash) {
+                        transactionHash = hash; console.log({ hash });
+                    })
+                    .once('receipt', function (receipt) {
+                        console.log({ receipt });
+                        transactionHash = receipt.transactionHash;
+                        resolve({ transactionHash })
+                    })
+                    .on('error', function (error) { errorMessage = error.message; console.log({ error }); resolve({ errorMessage }) })
+
+            })
+            .catch(function (error) {
+                errorMessage = error.message;
+                console.log({ error });
+                resolve({ errorMessage })
+
+            })
+    })
+
+}
+
+
+export const transferToken = async (tokenIds, toAddress) => {
+    await setupWeb3()
+
+    let transactionHashes = []
+    let errorMessage
+    await Promise.all(tokenIds.map(async (i) => {
+        const fromAddress = await getTokenOwner(i)
+
+        // because the base ERC721 contract has two overloaded versions of the safeTranferFrom function,
+        // we need to refer to it by its fully qualified name.
+        // const tranferFn = contract['safeTransferFrom(address,address,uint256)']
+        if (fromAddress === toAddress) {
+            console.log("Same TO & From address")
+            return { toAddress, fromAddress, i }
+        }
+        else {
+            await new Promise((resolve, reject) => {
+                nftContract.methods.safeTransferFrom(fromAddress, toAddress, i)
+                    .send({
+                        from: fromAddress
+                    }).once('transactionHash', function (hash) { transactionHashes.push(hash); resolve(hash) })
+                    // .once('receipt', function (receipt) { console.log({ receipt }) })
+                    // .on('confirmation', function (confNumber, receipt) { console.log({ confNumber, receipt }) })
+                    .on('error', function (error) { errorMessage = error.message; resolve(); console.log({ error }) })
+                // .then(function (receipt) {
+                //     const to = receipt.events.Transfer.returnValues.to
+                //     const tkId = receipt.events.Transfer.tokenId
+                //     return { to, tkId }
+                // })
+            })
+        }
+    }))
+
+    return { transactionHashes, errorMessage }
+
 }
