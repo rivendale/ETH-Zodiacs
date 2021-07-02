@@ -4,6 +4,7 @@ const initialState = {
     ethAccount: null,
     ethTokenIds: null,
     ethTokens: null,
+    accountStats: null,
 };
 
 function ethReducer(state, action) {
@@ -22,6 +23,11 @@ function ethReducer(state, action) {
             return {
                 ...state,
                 ethTokens: action.payload
+            };
+        case "GET_ETH_ACCOUNT_STATS":
+            return {
+                ...state,
+                accountStats: action.payload
             };
         default:
             return state;
@@ -50,15 +56,23 @@ export const EthProvider = ({ children }) => {
             payload: data
         });
     }
+    function getAccountStats(data) {
+        dispatch({
+            type: "GET_ETH_ACCOUNT_STATS",
+            payload: data
+        });
+    }
     return (
         <EthContext.Provider
             value={{
                 ethAccount: state.ethAccount,
                 ethTokenIds: state.ethTokenIds,
                 ethTokens: state.ethTokens,
+                accountStats: state.accountStats,
                 getEthAccount,
                 getEthTokenIds,
                 getEthTokens,
+                getAccountStats,
             }}>
             {children}
         </EthContext.Provider>
