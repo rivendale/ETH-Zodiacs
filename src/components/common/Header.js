@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
     makeStyles, Typography, Toolbar, Button, AppBar,
-    Link, IconButton, Menu, MenuItem, Avatar, Tooltip,
+    Link, IconButton, Menu, MenuItem, Avatar, Tooltip, Chip, Grid,
 } from '@material-ui/core';
 import { useHistory } from 'react-router';
 import { StyledBadge } from './StyledBadge';
-import { ethBrowserPresent, getAccount, getConnectedAccount } from '../eth/EthAccount';
+import { addressStats, ethBrowserPresent, getAccount, getConnectedAccount } from '../eth/EthAccount';
 import { EthContext } from '../../context/EthContext';
 import Message from './MessageDialog';
 import { EthIcon } from './EthIcon';
@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
         flexWrap: 'wrap',
     },
     toolbarTitle: {
-        flexGrow: 1,
+        // flexGrow: 1,
     },
     link: {
         margin: theme.spacing(1, 1.5),
@@ -43,10 +43,11 @@ const useStyles = makeStyles((theme) => ({
 export default function Header(props) {
     const classes = useStyles();
     const history = useHistory()
-    const { ethAccount, getEthAccount } = useContext(EthContext)
+    const { ethAccount, getEthAccount, accountStats, getAccountStats } = useContext(EthContext)
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [ethBrowserError, setEthBrowserError] = useState(false)
     const [accountChecked, setAccountChecked] = useState(false)
+    const [statsChecked, setStatsChecked] = useState(false)
     const open = Boolean(anchorEl);
 
     const handleMenu = (event) => {
@@ -60,6 +61,13 @@ export default function Header(props) {
         setAnchorEl(null);
         history.push(to)
     };
+    useEffect(() => {
+        if (ethAccount && !statsChecked) {
+            addressStats(ethAccount).then(({ stats }) => (getAccountStats(stats)))
+            setStatsChecked(true)
+
+        }
+    }, [ethAccount, getAccountStats, statsChecked])
     useEffect(() => {
         if (!accountChecked) {
 
@@ -88,32 +96,55 @@ export default function Header(props) {
             {ethBrowserError && <Message />}
             <AppBar position="static" color="default" elevation={0} className={classes.appBar}>
                 <Toolbar className={classes.toolbar}>
-                    <Typography noWrap className={classes.toolbarTitle}>
-                        <Link variant="h6" color="inherit" href="/">
-                            <img src="/assets/images/EthsignsLogo.png" alt="Ethsigns" className={classes.logo} />
-                        </Link>
-                    </Typography>
-                    <Button href="/year-signs" color="primary" variant="text" className={classes.link}>
-                        Year Signs
-                    </Button>
-
-                    <Button href="/my-signs" color="primary" variant="text" className={classes.link}>
-                        My Signs
-                    </Button>
-
-
-                    {accountChecked && !ethAccount &&
-                        <Button onClick={connectAccount} color="primary" variant="outlined" className={classes.link}>
-                            Connect with Metamask
-                        </Button>
-                    }
-                    {ethAccount &&
-                        <Tooltip title={ethAccount}>
-                            <Typography variant="body2" noWrap aria-label="deposit-funds">
-                                <EthIcon ethAccount={ethAccount} />
+                    <Grid container spacing={3}>
+                        <Grid item xs={2}>
+                            <Typography noWrap className={classes.toolbarTitle}>
+                                <Link variant="h6" color="inherit" href="/">
+                                    <img src="/assets/images/EthsignsLogo.png" alt="Ethsigns" className={classes.logo} />
+                                </Link>
                             </Typography>
-                        </Tooltip>
-                    }
+                        </Grid>
+                        <Grid item xs={10}>
+                            <Grid container justify="space-around">
+                                <Grid item xs={1}>
+                                    <Button href="/year-signs" color="primary" variant="text" className={classes.link}>
+                                        Year Signs
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={1}>
+                                    <Button href="/my-signs" color="primary" variant="text" className={classes.link}>
+                                        My Signs
+                                    </Button>
+                                </Grid>
+                                {accountChecked && !ethAccount &&
+                                    <Grid item xs={2}>
+                                        <Button onClick={connectAccount} color="primary" variant="outlined" className={classes.link}>
+                                            Connect with Metamask
+                                        </Button>
+                                    </Grid>
+                                }
+                                {ethAccount &&
+                                    <Grid item xs={1}>
+                                        <Tooltip title={ethAccount} aria-label="eth-account" arrow>
+                                            <Typography style={{ marginTop: "2vh" }} variant="body2" noWrap >
+                                                <EthIcon id="eth-account" ethAccount={ethAccount} />
+                                            </Typography>
+                                        </Tooltip>
+                                    </Grid>
+                                }
+                                {accountStats &&
+                                    <Grid item xs={1}>
+                                        <Chip className={classes.link} color="primary" variant="outlined" label="Total Mints" avatar={<Avatar style={{ width: "5vh" }}>{accountStats.tokens_minted}</Avatar>} />
+                                    </Grid>
+                                }
+                                {accountStats &&
+                                    <Grid item xs={1}>
+                                        <Chip className={classes.link} color="primary" variant="outlined" label="Remaining Mints" avatar={<Avatar style={{ width: "5vh" }} >{accountStats.remaining_mints}</Avatar>} />
+                                    </Grid>
+                                }
+                            </Grid>
+                        </Grid>
+                    </Grid>
                     {ethAccount && Config.PUBLIC_KEY === ethAccount && <div>
                         <IconButton
                             aria-label="account of current user"

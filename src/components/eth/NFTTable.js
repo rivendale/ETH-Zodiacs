@@ -415,7 +415,7 @@ export const NFTTable = ({ tokens }) => {
                                                     inputProps={{ 'aria-labelledby': labelId }}
                                                 />
                                             </TableCell>
-                                            <TableCell component="th" id={labelId} scope="row" padding="none">
+                                            <TableCell align="left" scope="integer" component="th" id={labelId} padding="none">
                                                 {row.tokenId}
                                             </TableCell>
                                             <TableCell align="right">

@@ -75,6 +75,27 @@ export const ethAction = async (signID, address, action) => {
 }
 
 
+
+export const addressStats = async (address) => {
+
+    let stats = null
+    await api({
+        method: "GET",
+        url: `users/stats/${address}`
+    }).then(({ data }) => {
+        stats = data
+    })
+        .catch(err => {
+            if (err.response) {
+                console.log(err.response)
+            } else if (err.request) {
+                console.log(err.request)
+            }
+        })
+    return { stats }
+}
+
+
 export const ethBrowserPresent = async () => {
 
     return !!(window.ethereum || window.web3)
@@ -143,6 +164,7 @@ export const getConnectedAccount = async () => {
 
 
 
+
 const getTokenOwner = async (tokenId) => {
     return nftContract.methods.ownerOf(tokenId).call()
 }
@@ -151,7 +173,7 @@ export const payMintingFee = async ({ amountToSend }) => {
     const account = await getAccount()
     const nonce = await web3.eth.getTransactionCount(config.PUBLIC_KEY, 'latest')
 
-    let weiAmount = web3.utils.toWei(amountToSend.toString(), 'wei')
+    let weiAmount = web3.utils.toWei(amountToSend.toString(), 'ether')
 
     var rawTransaction = {
         "from": account,
@@ -164,9 +186,10 @@ export const payMintingFee = async ({ amountToSend }) => {
 
     return await new Promise((resolve, _) => {
 
-        nftContract.methods.sendPayment().estimateGas({ from: account })
-            .then(function (gasAmount) {
-                rawTransaction.gasPrice = web3.utils.toHex(gasAmount * 800000)
+        nftContract.methods.sendPayment().estimateGas(rawTransaction)
+            .then(async function (gasAmount) {
+                rawTransaction.gas = web3.utils.toHex(gasAmount)
+                rawTransaction.gasPrice = web3.utils.toHex(await web3.eth.getGasPrice())
                 rawTransaction.gasLimit = web3.utils.toHex(gasAmount * 2)
 
                 nftContract.methods.sendPayment().send(rawTransaction)
