@@ -66,7 +66,7 @@ export const MyNFT = (props) => {
         <React.Fragment>
             {!ethTokens && loading === true && <SimpleBackdrop open={true} />}
             <Container maxWidth="md" component="main" className={classes.root}>
-                {!ethAccountPresent && !ethTokens ?
+                {!ethAccountPresent | (ethAccountPresent && ethTokens && (Object.keys(ethTokens).length === 0)) &&
                     <div>
                         <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
                             You do not have any NFTs
@@ -74,27 +74,19 @@ export const MyNFT = (props) => {
                         <Typography variant="h6" align="center" color="textSecondary" component="p">
                             Click <a href="/" >here</a> to enter your date of birth and mint NFT
                         </Typography>
+                    </div>}
+
+                {ethTokens && (Object.keys(ethTokens).length > 0) &&
+                    <div className={classes.title}>
+                        <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
+                            My NFT
+                        </Typography>
+                        <Typography variant="h6" align="center" color="textSecondary" component="p">
+                            Here is a list of your NFT
+                        </Typography>
+                        <NFTTable tokens={ethTokens} />
                     </div>
-                    :
-                    ethTokens ?
-                        <div className={classes.title}>
-                            <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
-                                My NFT
-                            </Typography>
-                            <Typography variant="h6" align="center" color="textSecondary" component="p">
-                                Here is a list of your NFT
-                            </Typography>
-                        </div> :
-                        // ethTokens && !ethTokens.length ?
-                        <div>
-                            <Typography component="h3" variant="h5" align="center" color="textPrimary" gutterBottom>
-                                You do not have any NFTs
-                            </Typography>
-                            <Typography variant="h6" align="center" color="textSecondary" component="p">
-                                Click <a href="/" >here</a> to enter your date of birth and mint NFT
-                            </Typography>
-                        </div>}
-                {ethTokens && <NFTTable tokens={ethTokens} />}
+                }
             </Container>
 
         </React.Fragment>

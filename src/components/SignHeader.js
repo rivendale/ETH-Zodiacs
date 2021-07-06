@@ -4,8 +4,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import { Fab } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
 
 const useStyles = makeStyles((theme) => ({
     mainFeaturedPost: {
@@ -47,15 +45,15 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignHeader(props) {
     const classes = useStyles();
-    const { post, history, signId } = props;
+    const { post } = props;
     return (
         <Paper className={classes.mainFeaturedPost} style={{ backgroundImage: `url(${post.image})` }}>
             {/* Increase the priority of the hero background image */}
             {<img style={{ display: 'none' }} src={post.image} alt={post.imageText} />}
             <div className={classes.overlay} />
-            <Fab variant="extended" className={classes.editIcon} color="primary" size="small" aria-label="edit" onClick={() => { history.push(`/zodiac-sign/edit/${signId}`) }}>
+            {/* <Fab variant="extended" className={classes.editIcon} color="primary" size="small" aria-label="edit" onClick={() => { history.push(`/zodiac-sign/edit/${signId}`) }}>
                 <EditIcon className={classes.extendedIcon} /> Edit
-            </Fab>
+            </Fab> */}
             <Grid container>
                 <Grid item md={6}>
                     <div className={classes.mainFeaturedPostContent}>
