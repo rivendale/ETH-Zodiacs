@@ -106,14 +106,14 @@ export const Sign = ({ history, match }) => {
   }, [ethAccount, getSign, userDob])
 
   useEffect(() => {
-    const validDate = moment(dob, "MM-DD-YYYY")
     const dateRegex = /^(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])-(19|20)\d{2}$/;
     if (!(dateRegex.test(dob))) {
       setInvalidDate(true)
     }
     else {
-      if (moment().format("MM-DD-YYYY") < validDate.format("MM-DD-YYYY")) setInvalidDate(true)
-      else setUserDob(validDate.format("MM-DD-YYYY"))
+      const validDate = new Date(moment(dob, "MM-DD-YYYY"))
+      if (new Date(moment().format("MM-DD-YYYY")) < validDate) setInvalidDate(true)
+      else setUserDob(validDate.toString())
     }
     setDateChecked(true)
   }, [dob])

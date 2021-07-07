@@ -1,7 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import {
     makeStyles, Typography, Toolbar, Button, AppBar,
     Link, IconButton, Menu, MenuItem, Avatar, Tooltip, Chip, Grid,
+    LinearProgress,
 } from '@material-ui/core';
 import { useHistory } from 'react-router';
 import { StyledBadge } from './StyledBadge';
@@ -24,6 +25,15 @@ const useStyles = makeStyles((theme) => ({
     },
     link: {
         margin: theme.spacing(1, 1.5),
+    },
+    pending: {
+        margin: theme.spacing(1, 1.5),
+        color: theme.palette.info.main,
+        borderColor: theme.palette.warning.main
+    },
+    progress: {
+        margin: theme.spacing("auto", 2.5),
+        width: "100%"
     },
     badge: {
         paddingRight: theme.spacing(5)
@@ -61,13 +71,22 @@ export default function Header(props) {
         setAnchorEl(null);
         history.push(to)
     };
+    const getStats = useCallback(() => {
+        addressStats(ethAccount).then(({ stats }) => (getAccountStats(stats)))
+        setStatsChecked(true)
+    }, [ethAccount, getAccountStats])
+
     useEffect(() => {
         if (ethAccount && !statsChecked) {
-            addressStats(ethAccount).then(({ stats }) => (getAccountStats(stats)))
-            setStatsChecked(true)
-
+            getStats()
         }
-    }, [ethAccount, getAccountStats, statsChecked])
+    }, [ethAccount, getStats, statsChecked])
+    useEffect(() => {
+        if (accountStats && !!accountStats.pending_mints) {
+            setTimeout(() => { getStats(); }, 5000);
+        }
+    }, [accountStats, getStats])
+
     useEffect(() => {
         if (!accountChecked) {
 
@@ -123,23 +142,29 @@ export default function Header(props) {
                                         </Button>
                                     </Grid>
                                 }
+                                {accountStats &&
+                                    <Grid item xs={1}>
+                                        <Chip className={classes.link} color="primary" variant="outlined" label="Total Mints" avatar={<Avatar style={{ width: "1.6vw" }}>{accountStats.tokens_minted}</Avatar>} />
+                                    </Grid>
+                                }
+                                {accountStats &&
+                                    <Grid item xs={1}>
+                                        <Chip className={classes.link} color="primary" variant="outlined" label="Remaining Mints" avatar={<Avatar style={{ width: "1.6vw" }} >{accountStats.remaining_mints}</Avatar>} />
+                                    </Grid>
+                                }
+                                {!!(accountStats && accountStats.pending_mints) &&
+                                    <Grid item xs={1}>
+                                        <Chip className={classes.pending} variant="outlined" label="Pending Mints" avatar={<Avatar style={{ width: "1.6vw", backgroundColor: "#2196f3", color: "#fff" }}>{accountStats.pending_mints}</Avatar>} />
+                                        <LinearProgress color="primary" className={classes.progress} />
+                                    </Grid>
+                                }
                                 {ethAccount &&
                                     <Grid item xs={1}>
                                         <Tooltip title={ethAccount} aria-label="eth-account" arrow>
-                                            <Typography style={{ marginTop: "2vh" }} variant="body2" noWrap >
+                                            <Typography style={{ marginTop: "1vw" }} variant="body2" noWrap >
                                                 <EthIcon id="eth-account" ethAccount={ethAccount} />
                                             </Typography>
                                         </Tooltip>
-                                    </Grid>
-                                }
-                                {accountStats &&
-                                    <Grid item xs={1}>
-                                        <Chip className={classes.link} color="primary" variant="outlined" label="Total Mints" avatar={<Avatar style={{ width: "5vh" }}>{accountStats.tokens_minted}</Avatar>} />
-                                    </Grid>
-                                }
-                                {accountStats &&
-                                    <Grid item xs={1}>
-                                        <Chip className={classes.link} color="primary" variant="outlined" label="Remaining Mints" avatar={<Avatar style={{ width: "5vh" }} >{accountStats.remaining_mints}</Avatar>} />
                                     </Grid>
                                 }
                             </Grid>
