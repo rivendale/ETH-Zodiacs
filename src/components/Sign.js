@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 export const Sign = ({ history, match }) => {
   const classes = useStyles();
   const { yearSigns, sign, getYearSigns, getSign } = useContext(GlobalContext);
-  const { ethAccount } = useContext(EthContext);
+  const { ethAccount, accountStats, getAccountStats } = useContext(EthContext);
   const [bestCompatibility, setBestCompatibility] = useState([]);
   const [worstCompatibility, setWorstCompatibility] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -186,8 +186,11 @@ export const Sign = ({ history, match }) => {
         setMinting(false)
       setTransactionHash(data.data.sign.transaction_hash)
       let updatedSign = sign
+      let updatedStats = accountStats
+      updatedStats.pending_mints += 1
       updatedSign.minted = true
       getSign(updatedSign)
+      getAccountStats(updatedStats)
     })
       .catch(err => {
         setMinting(false)
@@ -198,7 +201,7 @@ export const Sign = ({ history, match }) => {
           console.log(err.request)
         }
       })
-  }, [ethAccount, getSign, sign])
+  }, [accountStats, ethAccount, getAccountStats, getSign, sign])
 
   const handleMintNFT = (e) => {
     e.preventDefault()
@@ -270,7 +273,7 @@ export const Sign = ({ history, match }) => {
                 </Fab>
                 : minting ?
                   <div style={{ width: "65%" }}>
-                    Minting NFT...
+                    Minting NFT... (Do not exit this page)
                     <LinearLoader />
                   </div>
                   : ""
