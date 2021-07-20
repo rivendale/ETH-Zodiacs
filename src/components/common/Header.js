@@ -116,14 +116,14 @@ export default function Header(props) {
             <AppBar position="static" color="default" elevation={0} className={classes.appBar}>
                 <Toolbar className={classes.toolbar}>
                     <Grid container spacing={3}>
-                        <Grid item xs={2}>
+                        <Grid item xs={1}>
                             <Typography noWrap className={classes.toolbarTitle}>
                                 <Link variant="h6" color="inherit" href="/">
                                     <img src="/assets/images/EthsignsLogo.png" alt="Ethsigns" className={classes.logo} />
                                 </Link>
                             </Typography>
                         </Grid>
-                        <Grid item xs={10}>
+                        <Grid item xs={11}>
                             <Grid container justify="space-around">
                                 <Grid item xs={1}>
                                     <Button href="/year-signs" color="primary" variant="text" className={classes.link}>
