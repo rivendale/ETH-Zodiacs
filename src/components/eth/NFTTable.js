@@ -19,17 +19,18 @@ import Tooltip from '@material-ui/core/Tooltip';
 import ShareOutlinedIcon from '@material-ui/icons/ShareOutlined';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { Fab, Link, List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@material-ui/core';
+import { Box, Fab, Link, List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@material-ui/core';
 import SendIcon from '@material-ui/icons/Send';
 import { TransferNFT } from './TransferNFT';
 import { transferToken, validateEthAccount } from './EthAccount';
 import { EthContext } from '../../context/EthContext';
 import Config from '../../config';
+import Avatar from '@material-ui/core/Avatar';
 
 
-function createData(tokenId, nftURI, nftGatewayURL) {
-    return { tokenId, nftURI, nftGatewayURL };
-}
+// function createData(token_id, nftURI, nftGatewayURL) {
+//     return { token_id, nftURI, nftGatewayURL };
+// }
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
         return -1;
@@ -57,9 +58,10 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-    { id: 'tokenId', numeric: false, disablePadding: true, label: 'Token Id' },
-    { id: 'nftURI', numeric: true, disablePadding: false, label: 'Token URI' },
-    { id: 'nftGatewayURL', numeric: true, disablePadding: false, label: 'NFT Gateway URI' },
+    { id: 'token_id', numeric: false, disablePadding: true, label: 'Token Id' },
+    { id: 'image_url', numeric: true, disablePadding: false, label: 'Token Image' },
+    { id: 'token_url', numeric: true, disablePadding: false, label: 'Token URI' },
+    { id: 'gateway_token_url', numeric: true, disablePadding: false, label: 'NFT Gateway URI' },
 ];
 
 function EnhancedTableHead(props) {
@@ -163,8 +165,8 @@ const EnhancedTableToolbar = (props) => {
                     {/* <IconButton aria-label="Transfer"> */}
                     <Fab onClick={handleTransfer} variant="extended" style={{ width: "70vh", textTransform: "none" }}>
                         <ShareOutlinedIcon className={classes.extendedIcon} />
-                            Transfer NFT(s)
-                        </Fab>
+                        Transfer NFT(s)
+                    </Fab>
                     {/* </IconButton> */}
                 </Tooltip>
             ) : (
@@ -212,19 +214,23 @@ const useStyles = makeStyles((theme) => ({
     nested: {
         paddingLeft: theme.spacing(4),
     },
+    smallAvatar: {
+        width: theme.spacing(3),
+        height: theme.spacing(3),
+    },
 }));
 
 export const NFTTable = ({ tokens }) => {
     const classes = useStyles();
     const { ethAccount } = useContext(EthContext);
     const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('tokenId');
+    const [orderBy, setOrderBy] = React.useState('token_id');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [openTransfer, setOpenTransfer] = React.useState(false);
     const [tokenRows, setTokenRows] = React.useState([]);
-    const [tokensFetched, setTokensFetched] = React.useState(false);
+    // const [tokensFetched, setTokensFetched] = React.useState(false);
     const [address, setAddress] = React.useState(null);
     const [addressError, setAddressError] = React.useState("");
     const [transactionHashes, setTransactionHashes] = React.useState(null);
@@ -235,17 +241,17 @@ export const NFTTable = ({ tokens }) => {
     // for (const [key, value] of Object.entries(tokens)) {
     //     rows.push(createData(key, value, value))
     // }
-    useEffect(() => {
-        if (!tokensFetched) {
-            for (const [key, value] of Object.entries(tokens)) {
-                setTokenRows(tokenRows => [...tokenRows, createData(key, value, value)])
-            }
-            setTokensFetched(true)
-        }
-    }, [tokens, tokenRows, tokensFetched])
+    // useEffect(() => {
+    //     if (!tokensFetched) {
+    //         for (const [key, value] of Object.entries(tokens)) {
+    //             // setTokenRows(tokenRows => [...tokenRows, createData(key, value, value)])
+    //         }
+    //         setTokensFetched(true)
+    //     }
+    // }, [tokens, tokenRows, tokensFetched])
     const resetRows = useCallback(() => {
         let rows = tokenRows.filter(function (obj) {
-            return !selected.includes(obj.tokenId)
+            return !selected.includes(obj.token_id)
         });
         setTokenRows(rows)
         setSelected([0])
@@ -293,7 +299,7 @@ export const NFTTable = ({ tokens }) => {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelectedItems = tokenRows.map((n) => n.tokenId);
+            const newSelectedItems = tokenRows.map((n) => n.token_id);
             setSelected(newSelectedItems);
             return;
         }
@@ -335,7 +341,7 @@ export const NFTTable = ({ tokens }) => {
 
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, tokenRows.length - page * rowsPerPage);
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, tokens.length - page * rowsPerPage);
     return (
         <div className={classes.root}>
             <TransferNFT
@@ -393,11 +399,11 @@ export const NFTTable = ({ tokens }) => {
                             rowCount={tokenRows.length}
                         />
                         <TableBody>
-                            {stableSort(tokenRows, getComparator(order, orderBy))
+                            {stableSort(tokens, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row) => {
-                                    const isItemSelected = isSelected(row.tokenId);
-                                    const labelId = `enhanced-table-checkbox-${row.tokenId}`;
+                                    const isItemSelected = isSelected(row.token_id);
+                                    const labelId = `enhanced-table-checkbox-${row.token_id}`;
 
                                     return (
                                         <TableRow
@@ -405,26 +411,34 @@ export const NFTTable = ({ tokens }) => {
                                             role="checkbox"
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={row.tokenId}
+                                            key={row.token_id}
                                             selected={isItemSelected}
                                         >
                                             <TableCell padding="checkbox">
                                                 <Checkbox
-                                                    onClick={(event) => handleClick(event, row.tokenId)}
+                                                    onClick={(event) => handleClick(event, row.token_id)}
                                                     checked={isItemSelected}
                                                     inputProps={{ 'aria-labelledby': labelId }}
                                                 />
                                             </TableCell>
                                             <TableCell align="left" scope="integer" component="th" id={labelId} padding="none">
-                                                {row.tokenId}
+                                                {row.token_id}
                                             </TableCell>
-                                            <TableCell align="right">
-                                                {row.nftURI.substr(7, 11) + '...' + row.nftURI.substr(row.nftURI.length - 6, row.nftURI.length)}
-                                                <OpenInNewIcon style={{ cursor: "pointer" }} onClick={() => handleRedirect(row.nftGatewayURL)} />
+                                            <TableCell sortDirection={false} align="left" scope="integer" component="th" id={labelId} padding="none">
+
+                                                <Box style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                                    <Box style={{ margin: "auto" }}>
+                                                        <Avatar alt={row.image_url.split('.').pop()} src={row.image_url} className={classes.smallAvatar} />
+                                                    </Box>
+                                                </Box>
                                             </TableCell>
-                                            <TableCell align="right">
-                                                {row.nftGatewayURL.substr(7, 11) + '...' + row.nftGatewayURL.substr(row.nftGatewayURL.length - 6, row.nftGatewayURL.length)}
-                                                <OpenInNewIcon style={{ cursor: "pointer" }} onClick={() => handleRedirect(row.nftGatewayURL)} />
+                                            <TableCell sortDirection={false} align="right">
+                                                {row.token_url.substr(7, 11) + '...' + row.token_url.substr(row.token_url.length - 6, row.token_url.length)}
+                                                <OpenInNewIcon style={{ cursor: "pointer" }} onClick={() => handleRedirect(row.token_url)} />
+                                            </TableCell>
+                                            <TableCell sortDirection={false} align="right">
+                                                {row.gateway_token_url.substr(7, 11) + '...' + row.gateway_token_url.substr(row.gateway_token_url.length - 6, row.gateway_token_url.length)}
+                                                <OpenInNewIcon style={{ cursor: "pointer" }} onClick={() => handleRedirect(row.gateway_token_url)} />
                                             </TableCell>
                                         </TableRow>
                                     );
@@ -440,7 +454,7 @@ export const NFTTable = ({ tokens }) => {
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={tokenRows.length}
+                    count={tokens?.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onChangePage={handleChangePage}
