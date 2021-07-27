@@ -60,7 +60,7 @@ export const YearSigns = () => {
                     {!!yearSigns.data.length && yearSigns.data.map((sign, key) => (
                         <Fragment key={key}>
                             <ListItem alignItems="flex-start">
-                                <Link href={`/year-signs/${sign.id}`}>
+                                <Link href={`/zodiac-sign/${sign.id}`}>
                                     <ListItemAvatar>
                                         <Avatar alt={sign.name} src={sign.image_url} />
                                     </ListItemAvatar>
