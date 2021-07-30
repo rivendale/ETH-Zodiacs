@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
+import { useHistory } from 'react-router';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -19,7 +20,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import ShareOutlinedIcon from '@material-ui/icons/ShareOutlined';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { Box, Fab, Link, List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@material-ui/core';
+import { Box, Button, Fab, Link, List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@material-ui/core';
 import SendIcon from '@material-ui/icons/Send';
 import { TransferNFT } from './TransferNFT';
 import { transferToken, validateEthAccount } from './EthAccount';
@@ -236,7 +237,7 @@ export const NFTTable = ({ tokens }) => {
     const [transactionHashes, setTransactionHashes] = React.useState(null);
     const [transferError, setTransferError] = React.useState(null);
     const [transferLoading, setTransferLoading] = React.useState(false);
-
+    const history = useHistory()
     // var rows = []
     // for (const [key, value] of Object.entries(tokens)) {
     //     rows.push(createData(key, value, value))
@@ -422,7 +423,9 @@ export const NFTTable = ({ tokens }) => {
                                                 />
                                             </TableCell>
                                             <TableCell align="left" scope="integer" component="th" id={labelId} padding="none">
-                                                {row.token_id}
+                                                <Button style={{ textTransform: "none" }} endIcon={<OpenInNewIcon />} onClick={() => { history.push(`/nft/${row.token_id}`) }}>
+                                                    {row.token_id}
+                                                </Button>
                                             </TableCell>
                                             <TableCell sortDirection={false} align="left" scope="integer" component="th" id={labelId} padding="none">
 

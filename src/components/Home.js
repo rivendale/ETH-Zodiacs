@@ -211,7 +211,7 @@ export const Home = () => {
     }
     const handleSubmit = (e) => {
         e.preventDefault();
-        history.push({ pathname: `/sign/${dob}` })
+        history.push({ pathname: `/sign/${btoa(dob).replace("==", "")}` })
     }
     const dateFormatter = str => {
         return str;
@@ -301,6 +301,7 @@ export const Home = () => {
                                                 alt={nft.token_metadata.name}
                                                 title={nft.token_metadata.name}
                                                 className={classes.cardImage}
+
                                             />
                                         </LazyLoad>
 
@@ -341,12 +342,9 @@ export const Home = () => {
                                             </div>
                                         </CardContent>
                                         <CardActions className={classes.card}>
-                                            {/* <Button className={classes.button} fullWidth variant="contained" color="primary">
-                                            Play now
-                                        </Button> */}
-                                            {/* <Button style={{ color: "#312E58" }} className={classes.button} href={`/games/${"nft.id"}`} fullWidth variant="outlined" color="primary">
-                                            Game info
-                                        </Button> */}
+                                            <Button style={{ color: "#312E58" }} className={classes.button} href={`/nft/${nft.token_id}`} fullWidth variant="outlined" color="primary">
+                                                NFT info
+                                            </Button>
                                         </CardActions>
 
                                     </Card>
