@@ -168,7 +168,10 @@ export const getConnectedAccount = async () => {
 const getTokenOwner = async (tokenId) => {
     return nftContract.methods.ownerOf(tokenId).call()
 }
-
+const ERROR_MAPPER = {
+    "-32603": 'Insufficient funds in your account',
+    "4001": "Transaction cancelled"
+}
 export const payMintingFee = async ({ amountToSend }) => {
     const account = await getAccount()
     const nonce = await web3.eth.getTransactionCount(config.PUBLIC_KEY, 'latest')
@@ -201,12 +204,26 @@ export const payMintingFee = async ({ amountToSend }) => {
                         transactionHash = receipt.transactionHash;
                         resolve({ transactionHash })
                     })
-                    .on('error', function (error) { errorMessage = error.message; console.log({ error }); resolve({ errorMessage }) })
+                    .on('error', function (error) {
+                        if (ERROR_MAPPER.hasOwnProperty(error.code?.toString())) {
+                            errorMessage = ERROR_MAPPER[error.code?.toString()]
+                        }
+                        else {
+                            errorMessage = error.message;
+                        }
+                        // console.log({ error });
+                        resolve({ errorMessage })
+                    })
 
             })
             .catch(function (error) {
-                errorMessage = error.message;
-                console.log({ error });
+                if (error.stack.toString().includes("-32000")) {
+                    errorMessage = "Insufficient funds!"
+                }
+                else {
+                    errorMessage = error.message;
+                }
+                // console.log({ error });
                 resolve({ errorMessage })
 
             })
