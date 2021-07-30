@@ -56,8 +56,9 @@ export const Sign = ({ history, match }) => {
   const [invalidDate, setInvalidDate] = useState(false)
   const [spinnerOpen, setSpinnerOpen] = useState(false)
   const [signFetched, setSignFetched] = useState(false)
+  const [dob, setDob] = useState(null)
 
-  let dob = match.params.dob
+  // let dob = match.params.dob
 
   const fetchSigns = useCallback(async () => {
     setLoading(true)
@@ -106,17 +107,25 @@ export const Sign = ({ history, match }) => {
   }, [ethAccount, getSign, userDob])
 
   useEffect(() => {
-    const dateRegex = /^(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])-(19|20)\d{2}$/;
-    if (!(dateRegex.test(dob))) {
+    try {
+      const param = atob(match.params.dob + "==")
+      setDob(param)
+    } catch (error) {
       setInvalidDate(true)
     }
-    else {
-      const validDate = new Date(moment(dob, "MM-DD-YYYY"))
-      if (new Date(moment().format("MM-DD-YYYY")) < validDate) setInvalidDate(true)
-      else setUserDob(validDate.toString())
+    if (dob) {
+      const dateRegex = /^(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])-(19|20)\d{2}$/;
+      if (!(dateRegex.test(dob))) {
+        setInvalidDate(true)
+      }
+      else {
+        const validDate = new Date(moment(dob, "MM-DD-YYYY"))
+        if (new Date(moment().format("MM-DD-YYYY")) < validDate) setInvalidDate(true)
+        else setUserDob(validDate.toString())
+      }
+      setDateChecked(true)
     }
-    setDateChecked(true)
-  }, [dob])
+  }, [dob, match.params.dob])
 
   useEffect(() => {
     if (!signFetched && userDob && dateChecked) {
