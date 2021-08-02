@@ -228,7 +228,7 @@ export const NFTTable = ({ tokens }) => {
     const [orderBy, setOrderBy] = React.useState('token_id');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const [openTransfer, setOpenTransfer] = React.useState(false);
     const [tokenRows, setTokenRows] = React.useState([]);
     // const [tokensFetched, setTokensFetched] = React.useState(false);
@@ -455,7 +455,7 @@ export const NFTTable = ({ tokens }) => {
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[10, 25, 50, 100, { label: 'All', value: 1000 }]}
                     component="div"
                     count={tokens?.length}
                     rowsPerPage={rowsPerPage}

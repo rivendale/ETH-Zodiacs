@@ -30,6 +30,7 @@ import { EthIcon } from "./common/EthIcon";
 
 import Tooltip from '@material-ui/core/Tooltip';
 import { CustomSnackbar } from "./common/SnackBar";
+import { BackgroundImage } from "react-image-and-background-image-fade";
 
 
 const theme = createMuiTheme({
@@ -72,7 +73,7 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(3),
     },
     submit: {
-        margin: theme.spacing(3, 0, 2)
+        margin: theme.spacing(3, 0, 2),
     },
     cardDetail: {
         display: 'flex',
@@ -108,14 +109,15 @@ const useStyles = makeStyles((theme) => ({
         // height: "18vh",
     },
     cardImage: {
-        height: " 45vh",
-        backgroundPosition: "top",
-        [theme.breakpoints.down('sm')]: {
-            height: " 45vh",
-        },
-        [theme.breakpoints.down('xs')]: {
-            height: " 55vh",
-        }
+        // height: " 45vh",
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: "center top",
+        // [theme.breakpoints.down('sm')]: {
+        //     height: " 45vh",
+        // },
+        // [theme.breakpoints.down('xs')]: {
+        //     height: " 55vh",
+        // }
     },
     ul: {
         listStyle: "none",
@@ -276,7 +278,7 @@ export const Home = () => {
                                 className={classes.submit}
                                 disabled={error}
                             >
-                                Get Sign
+                                Get Your Sign!
                             </Button>
                         </form>
                     </Container>
@@ -297,12 +299,22 @@ export const Home = () => {
 
                                             <CardMedia
                                                 component="div"
-                                                style={{ backgroundImage: `url(${nft.image_url})` }}
-                                                alt={nft.token_metadata.name}
+                                                // style={{ backgroundImage: `url(${nft.image_url})` }}
+                                                // alt={nft.token_metadata.name}
                                                 title={nft.token_metadata.name}
                                                 className={classes.cardImage}
 
-                                            />
+                                            >
+                                                <BackgroundImage
+                                                    src={nft.image_url}
+                                                    width="100%"
+                                                    height="90%"
+                                                    alt={nft.token_metadata.name}
+                                                    isResponsive
+                                                    className={classes.cardImage}
+                                                    lazyLoad
+                                                />
+                                            </CardMedia>
                                         </LazyLoad>
 
                                         <CardContent style={{ display: "grid" }} >
@@ -343,7 +355,7 @@ export const Home = () => {
                                         </CardContent>
                                         <CardActions className={classes.card}>
                                             <Button style={{ color: "#312E58" }} className={classes.button} href={`/nft/${nft.token_id}`} fullWidth variant="outlined" color="primary">
-                                                NFT info
+                                                NFT Details
                                             </Button>
                                         </CardActions>
 

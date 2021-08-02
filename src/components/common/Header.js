@@ -2,7 +2,6 @@ import React, { Fragment, useCallback, useContext, useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
@@ -14,7 +13,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { Box, Button } from '@material-ui/core';
-import { Link as RouterLink } from "react-router-dom";
+import { Link, Link as RouterLink } from "react-router-dom";
 import { DeviceContext } from '../../context/DeviceContext';
 import { EthContext } from '../../context/EthContext';
 import { addressStats, ethBrowserPresent, getAccount, getConnectedAccount } from '../eth/EthAccount';
@@ -75,9 +74,11 @@ const useStyles = makeStyles((theme) => ({
     },
     logoText: {
         margin: theme.spacing("auto", 1),
+        textTransform: "none"
     },
     logoImage: {
         maxWidth: 45,
+        // cursor: "pointer",
         // "@media (max-width: 900px)": {
         //     display: "none",
         // },
@@ -341,7 +342,7 @@ export default function Header() {
 
     return (
         <div className={classes.root}>
-            <CssBaseline />
+            {/* <CssBaseline /> */}
             <AppBar
                 position="static"
                 className={clsx(classes.appBar, {
@@ -359,15 +360,18 @@ export default function Header() {
                         <MenuIcon />
                     </IconButton>}
                     <Box className={classes.logo}>
-                        <img
-                            src="/assets/images/EthsignsLogo.png"
-                            alt="logo"
-                            href="/"
-                            className={classes.logoImage}
-                        />
+                        <Link to="/">
+                            <img
+                                src="/assets/images/EthsignsLogo.png"
+                                alt="logo"
+                                href="/"
+
+                                className={classes.logoImage}
+                            />
+                        </Link>
                         {!smDeviceView &&
                             <Button component={RouterLink} fullWidth to="/" className={classes.logoText}>
-                                Eth Signs
+                                NFT Zodiacs
                             </Button>}
                     </Box>
                     {!mobileView && <Fragment>
@@ -423,13 +427,6 @@ export default function Header() {
                         <ListItem>
                             {authModule()}
                         </ListItem>
-                        {/* <ListItem>
-                            <div style={{ height: "5vh", }}>
-                                <div style={{ marginTop: "4vh" }}>
-                                    {toggleModule()}
-                                </div>
-                            </div>
-                        </ListItem> */}
                     </List>
                 </Drawer>
             }

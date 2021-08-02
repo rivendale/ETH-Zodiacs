@@ -10,8 +10,8 @@ function Copyright() {
         <Typography variant="body2" color="textSecondary" align="center">
             {'Copyright © '}
             <Link color="inherit" href="http://ethzodiacs.com/">
-                Ethsigns
-      </Link>{' '}
+                <b>NFT Zodiacs</b>
+            </Link>{' '}
             {new Date().getFullYear()}
             {'.'}
         </Typography>
@@ -33,7 +33,7 @@ export default function Footer() {
         <footer className={classes.footer}>
             <Container maxWidth="lg">
                 <Typography variant="h6" align="center" gutterBottom>
-                    Ethsigns
+                    NFT Zodiacs
                 </Typography>
                 <Typography variant="subtitle1" align="center" color="textSecondary" component="p">
                     Chinese zodiac signs

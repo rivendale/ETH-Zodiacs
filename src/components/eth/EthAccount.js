@@ -169,7 +169,7 @@ const getTokenOwner = async (tokenId) => {
     return nftContract.methods.ownerOf(tokenId).call()
 }
 const ERROR_MAPPER = {
-    "-32603": 'Insufficient funds in your account',
+    "-32000": 'Insufficient funds in your account',
     "4001": "Transaction cancelled"
 }
 export const payMintingFee = async ({ amountToSend }) => {
@@ -218,7 +218,7 @@ export const payMintingFee = async ({ amountToSend }) => {
             })
             .catch(function (error) {
                 if (error.stack.toString().includes("-32000")) {
-                    errorMessage = "Insufficient funds!"
+                    errorMessage = ERROR_MAPPER["-32000"]
                 }
                 else {
                     errorMessage = error.message;
