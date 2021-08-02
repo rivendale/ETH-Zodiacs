@@ -21,6 +21,8 @@ import { EthIcon } from './EthIcon';
 import HomeIcon from '@material-ui/icons/Home';
 import ClearAllIcon from '@material-ui/icons/ClearAll';
 import PersonIcon from '@material-ui/icons/Person';
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import Config from '../../config';
 
 const drawerWidth = 240;
 
@@ -273,6 +275,13 @@ export default function Header() {
     };
 
     const navigationButtons = () => {
+        if (ethAccount && Config.PUBLIC_KEY === ethAccount) {
+            headersData.push({
+                label: "Admin",
+                href: "/profile",
+                icon: <SupervisorAccountIcon />,
+            })
+        }
         return headersData.map(({ label, href, icon }) => {
             return (
                 <Button

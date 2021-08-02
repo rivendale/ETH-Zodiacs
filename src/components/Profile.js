@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { Container, Paper } from '@material-ui/core';
@@ -6,13 +6,14 @@ import { useHistory } from 'react-router';
 
 import Grid from '@material-ui/core/Grid';
 import CardActionArea from '@material-ui/core/CardActionArea';
-import { adminWithdraw, getAdminBalance, getTokenSupply } from './eth/EthAccount';
+import { adminWithdraw, getTokenSupply } from './eth/EthAccount';
 import { LinearLoader, Spinner } from './common/Loaders';
 import { EthContext } from '../context/EthContext';
 import Fab from '@material-ui/core/Fab';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import Config from '../config';
 import { AlertMessage } from './common/Alert';
+import api from '../api';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -61,7 +62,28 @@ export const Profile = () => {
     const [isAdmin, setIsAdmin] = React.useState(null)
     const [txHash, setTxHash] = React.useState(null)
     const [withdrawError, setWithdrawError] = React.useState(null)
+    const [balanceFetched, setBalanceFetched] = React.useState(false)
     const history = useHistory()
+
+    const fetchBalance = useCallback(async () => {
+        // use the await keyword to grab the resolved promise value
+        // remember: await can only be used within async functions!
+        await api({
+            method: "GET",
+            url: `admin/wallet`
+        }).then(data => {
+            // update local state with the retrieved data
+            setBalance(data.data.wallet)
+        })
+            .catch(err => {
+                if (err.response) {
+                    console.log(err.response)
+                } else if (err.request) {
+                    console.log(err.request)
+                }
+            })
+        setBalanceFetched(true)
+    }, [])
 
     useEffect(() => {
         if (ethAccount && Config.PUBLIC_KEY === ethAccount) { setIsAdmin(true) }
@@ -73,12 +95,17 @@ export const Profile = () => {
             history.goBack()
         }
     })
-
-    getAdminBalance().then(bal => {
-        if (bal) {
-            setBalance(bal)
+    useEffect(() => {
+        if (!balanceFetched && !balance) {
+            fetchBalance()
         }
     })
+
+    // getAdminBalance().then(bal => {
+    //     if (bal) {
+    //         setBalance(bal)
+    //     }
+    // })
     getTokenSupply().then(supply => {
         if (supply) {
             setSupply(supply)
@@ -130,20 +157,21 @@ export const Profile = () => {
                                         <Grid item xs={12} sm={6}>
                                             {balance ?
                                                 <Typography variant="body2" component="p" >
-                                                    {balance} ETH
-                                        </Typography> :
+                                                    {balance?.wallet_balance} ETH
+                                                </Typography> :
                                                 <LinearLoader />}                                        </Grid>
-                                        {balance && +balance > 0 && <Grid item xs={12} sm={6}>
-                                            <Grid container direction="row" justify="flex-end">
-                                                {withdrawing ?
-                                                    <Spinner /> :
-                                                    <Fab style={{ textTransform: "none" }} onClick={handleWithdraw} variant="extended" color="primary" aria-label="withdraw">
-                                                        <GetAppIcon className={classes.extendedIcon} />
-                                                        Withdraw
-                                                    </Fab>
-                                                }
-                                            </Grid>
-                                        </Grid>}
+                                        {!!(balance?.wallet_balance && +balance?.wallet_balance > 0) &&
+                                            <Grid item xs={12} sm={6}>
+                                                <Grid container direction="row" justify="flex-end">
+                                                    {withdrawing ?
+                                                        <Spinner /> :
+                                                        <Fab style={{ textTransform: "none" }} onClick={handleWithdraw} variant="extended" color="primary" aria-label="withdraw">
+                                                            <GetAppIcon className={classes.extendedIcon} />
+                                                            Withdraw
+                                                        </Fab>
+                                                    }
+                                                </Grid>
+                                            </Grid>}
                                     </Grid>
 
                                 </div>

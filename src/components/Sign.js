@@ -281,12 +281,12 @@ export const Sign = ({ history, match }) => {
                 <VerifiedUserOutlinedIcon className={classes.extendedIcon} />
                 Minted
               </Fab>
-              : minting && !mintingError ?
+              : !minting && !mintingError ?
                 <Fab onClick={handleMintNFT} size="small" disabled={minting} variant="extended" style={{ textTransform: "none" }}>
                   <DeviceHubOutlinedIcon className={classes.extendedIcon} />
                   Mint NFT
                 </Fab>
-                : !minting ?
+                : minting ?
                   <div className={classes.mintingDisplay}>
                     Minting NFT... (Do not exit this page)
                     <LinearLoader />
