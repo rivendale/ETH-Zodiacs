@@ -27,13 +27,16 @@ const setupWeb3 = async () => {
 
     web3 = new Web3(provider);
     nftContract = new web3.eth.Contract(contract.abi, contractAddress);
-
 }
 
 
 export const validateEthAccount = async (address) => {
-    await setupWeb3(true)
+    await setupWeb3()
     return !web3.utils.isAddress(address)
+}
+export const getChainId = async () => {
+    await setupWeb3()
+    return await web3.eth.getChainId()
 }
 
 
@@ -101,12 +104,13 @@ export const ethBrowserPresent = async () => {
     return !!(window.ethereum || window.web3)
 }
 
+// ethereum.on('accountsChanged', function(accounts=>{console.log(accounts)}));
 
 export const getAccount = async (connect = false) => {
 
     // let w3
     if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
-        await setupWeb3(true)
+        await setupWeb3()
         const accounts = await web3.eth.getAccounts()
         return accounts[0] || null
 

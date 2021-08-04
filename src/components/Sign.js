@@ -17,6 +17,8 @@ import Config from '../config';
 import { AlertMessage } from './common/Alert';
 import moment from "moment";
 import { Error404Page } from './common/Error404Page';
+import Alert from '@material-ui/lab/Alert';
+import { AlertTitle } from '@material-ui/lab';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
 export const Sign = ({ history, match }) => {
   const classes = useStyles();
   const { yearSigns, sign, getYearSigns, getSign } = useContext(GlobalContext);
-  const { ethAccount, accountStats, getAccountStats } = useContext(EthContext);
+  const { ethAccount, accountStats, getAccountStats, chainId } = useContext(EthContext);
   const [bestCompatibility, setBestCompatibility] = useState([]);
   const [worstCompatibility, setWorstCompatibility] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -274,7 +276,15 @@ export const Sign = ({ history, match }) => {
         {mintingError &&
           <AlertMessage message={mintingError} handleMessageClick={handleMessageClick} />
         }
-        {!transactionHash && sign && sign.day_animal &&
+        {!!(chainId && chainId !== 137) &&
+          <div className={classes.mintingDisplay}>
+            <Alert severity="warning">
+              <AlertTitle>Warning</AlertTitle>
+              Please connect to Matic Main Network to mint NFT.
+            </Alert>
+          </div>
+        }
+        {!!(chainId && chainId === 137) && !transactionHash && sign && sign.day_animal &&
           <span>
             {sign.minted ?
               <Fab size="small" variant="extended" className={classes.mintedIcon} >

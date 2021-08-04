@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
 
 export const Profile = () => {
     const classes = useStyles();
-    const { ethAccount } = useContext(EthContext)
+    const { ethAccount, accountStats } = useContext(EthContext)
     const [balance, setBalance] = React.useState(null)
     const [supply, setSupply] = React.useState(null)
     const [withdrawing, setWithdrawing] = React.useState(false)
@@ -86,9 +86,15 @@ export const Profile = () => {
     }, [])
 
     useEffect(() => {
-        if (ethAccount && Config.PUBLIC_KEY === ethAccount) { setIsAdmin(true) }
-        else setIsAdmin(false)
-    }, [ethAccount])
+        if (ethAccount && accountStats) {
+            if (accountStats.is_admin) {
+                setIsAdmin(true)
+            }
+            else {
+                setIsAdmin(false)
+            }
+        }
+    }, [accountStats, ethAccount])
 
     useEffect(() => {
         if (isAdmin === false) {
@@ -157,7 +163,7 @@ export const Profile = () => {
                                         <Grid item xs={12} sm={6}>
                                             {balance ?
                                                 <Typography variant="body2" component="p" >
-                                                    {balance?.wallet_balance} ETH
+                                                    {balance?.wallet_balance} Matic
                                                 </Typography> :
                                                 <LinearLoader />}                                        </Grid>
                                         {!!(balance?.wallet_balance && +balance?.wallet_balance > 0) &&

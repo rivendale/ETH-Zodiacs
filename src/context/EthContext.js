@@ -5,6 +5,7 @@ const initialState = {
     ethTokenIds: null,
     ethTokens: null,
     accountStats: null,
+    chainId: null,
 };
 
 function ethReducer(state, action) {
@@ -28,6 +29,11 @@ function ethReducer(state, action) {
             return {
                 ...state,
                 accountStats: action.payload
+            };
+        case "GET_ETH_CHAIN_ID":
+            return {
+                ...state,
+                chainId: action.payload
             };
         default:
             return state;
@@ -62,6 +68,12 @@ export const EthProvider = ({ children }) => {
             payload: data
         });
     }
+    function getEthChainId(data) {
+        dispatch({
+            type: "GET_ETH_CHAIN_ID",
+            payload: data
+        });
+    }
     return (
         <EthContext.Provider
             value={{
@@ -69,10 +81,12 @@ export const EthProvider = ({ children }) => {
                 ethTokenIds: state.ethTokenIds,
                 ethTokens: state.ethTokens,
                 accountStats: state.accountStats,
+                chainId: state.chainId,
                 getEthAccount,
                 getEthTokenIds,
                 getEthTokens,
                 getAccountStats,
+                getEthChainId,
             }}>
             {children}
         </EthContext.Provider>

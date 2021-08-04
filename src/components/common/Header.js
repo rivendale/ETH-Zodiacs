@@ -16,13 +16,16 @@ import { Box, Button } from '@material-ui/core';
 import { Link, Link as RouterLink } from "react-router-dom";
 import { DeviceContext } from '../../context/DeviceContext';
 import { EthContext } from '../../context/EthContext';
-import { addressStats, ethBrowserPresent, getAccount, getConnectedAccount } from '../eth/EthAccount';
+import {
+    addressStats, ethBrowserPresent,
+    getAccount, getConnectedAccount,
+    getChainId
+} from '../eth/EthAccount';
 import { EthIcon } from './EthIcon';
 import HomeIcon from '@material-ui/icons/Home';
 import ClearAllIcon from '@material-ui/icons/ClearAll';
 import PersonIcon from '@material-ui/icons/Person';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
-import Config from '../../config';
 
 const drawerWidth = 240;
 
@@ -150,7 +153,7 @@ const useStyles = makeStyles((theme) => ({
         color: "#A09FB2"
     },
 }));
-const headersData = [
+const headersRawData = [
     {
         label: "Home",
         href: "/",
@@ -178,10 +181,13 @@ export default function Header() {
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
     const { smDeviceView, mobileView, setMobileDevice, setSmallDevice } = useContext(DeviceContext)
-    const { ethAccount, getEthAccount, accountStats, getAccountStats } = useContext(EthContext)
+    const { ethAccount, getEthAccount, accountStats, getAccountStats, getEthChainId } = useContext(EthContext)
     const [setEthBrowserError] = React.useState(false)
     const [accountChecked, setAccountChecked] = React.useState(false)
+    const [ethereum, setEthereum] = React.useState(null)
     const [statsChecked, setStatsChecked] = React.useState(false)
+    const [adminSet, setAdminSet] = React.useState(false);
+    const [headersData, setHeadersData] = React.useState([...headersRawData])
     let [width, setWidth] = React.useState(getWidth());
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -257,11 +263,14 @@ export default function Header() {
             getConnectedAccount().then(acc => {
                 if (acc) {
                     getEthAccount(acc)
+                    getChainId().then(chainId => {
+                        getEthChainId(chainId)
+                    })
                 }
             })
             setAccountChecked(true)
         }
-    }, [accountChecked, getEthAccount])
+    }, [accountChecked, getEthAccount, getEthChainId])
     const connectAccount = async () => {
         if (!ethAccount) {
             const isEthBrowserPresent = await ethBrowserPresent()
@@ -273,15 +282,32 @@ export default function Header() {
                 setEthBrowserError(true)
         }
     };
-
-    const navigationButtons = () => {
-        if (ethAccount && Config.PUBLIC_KEY === ethAccount) {
-            headersData.push({
-                label: "Admin",
-                href: "/profile",
-                icon: <SupervisorAccountIcon />,
-            })
+    useEffect(() => {
+        if (window.ethereum.isConnected()) {
+            setEthereum(window.ethereum)
         }
+        ethereum?.on('accountsChanged', (accounts) => {
+            getEthAccount(accounts[0])
+        });
+        ethereum?.on('chainChanged', (chain) => {
+            getEthChainId(parseInt(chain, 16))
+        });
+    }, [ethereum, getEthAccount, getEthChainId])
+    useEffect(() => {
+
+        const adminNav = {
+            label: "Admin",
+            href: "/profile",
+            icon: <SupervisorAccountIcon />,
+        }
+        if (ethAccount && accountStats) {
+            if (headersData.some(nav => nav.label !== "Admin") && accountStats.is_admin && !adminSet) {
+                setHeadersData([...headersData, adminNav])
+                setAdminSet(true)
+            }
+        }
+    }, [accountStats, adminSet, ethAccount, headersData])
+    const navigationButtons = () => {
         return headersData.map(({ label, href, icon }) => {
             return (
                 <Button
