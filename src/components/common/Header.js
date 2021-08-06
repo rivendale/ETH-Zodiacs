@@ -283,15 +283,20 @@ export default function Header() {
         }
     };
     useEffect(() => {
+        let timeoutId = null;
         if (window.ethereum.isConnected()) {
             setEthereum(window.ethereum)
         }
-        ethereum?.on('accountsChanged', (accounts) => {
-            getEthAccount(accounts[0])
-        });
-        ethereum?.on('chainChanged', (chain) => {
-            getEthChainId(parseInt(chain, 16))
-        });
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            ethereum?.on('accountsChanged', (accounts) => {
+                getEthAccount(accounts[0])
+            });
+            ethereum?.on('chainChanged', (chain) => {
+                getEthChainId(parseInt(chain, 16))
+            });
+        }, 150);
+
     }, [ethereum, getEthAccount, getEthChainId])
     useEffect(() => {
 

@@ -306,7 +306,7 @@ export const Home = () => {
 
                                             >
                                                 <BackgroundImage
-                                                    src={nft.image_url}
+                                                    src={`https://api.allorigins.win/raw?url=${nft.image_url}`}
                                                     width="100%"
                                                     height="90%"
                                                     alt={nft.token_metadata.name}

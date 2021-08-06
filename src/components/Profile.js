@@ -6,7 +6,7 @@ import { useHistory } from 'react-router';
 
 import Grid from '@material-ui/core/Grid';
 import CardActionArea from '@material-ui/core/CardActionArea';
-import { adminWithdraw, getTokenSupply } from './eth/EthAccount';
+import { adminWithdraw } from './eth/EthAccount';
 import { LinearLoader, Spinner } from './common/Loaders';
 import { EthContext } from '../context/EthContext';
 import Fab from '@material-ui/core/Fab';
@@ -57,7 +57,6 @@ export const Profile = () => {
     const classes = useStyles();
     const { ethAccount, accountStats } = useContext(EthContext)
     const [balance, setBalance] = React.useState(null)
-    const [supply, setSupply] = React.useState(null)
     const [withdrawing, setWithdrawing] = React.useState(false)
     const [isAdmin, setIsAdmin] = React.useState(null)
     const [txHash, setTxHash] = React.useState(null)
@@ -112,11 +111,6 @@ export const Profile = () => {
     //         setBalance(bal)
     //     }
     // })
-    getTokenSupply().then(supply => {
-        if (supply) {
-            setSupply(supply)
-        }
-    })
     const handleWithdraw = () => {
         setWithdrawing(true)
         adminWithdraw().then(({ errorMessage, transactionHash }) => { setWithdrawError(errorMessage); setTxHash(transactionHash); setWithdrawing(false) })
@@ -191,9 +185,10 @@ export const Profile = () => {
                                     <Typography component="h2" variant="h5" gutterBottom>
                                         Total Tokens Minted
                                     </Typography>
-                                    {supply ?
+                                    {!!(balance?.total_tokens)
+                                        ?
                                         <Typography variant="body2" component="p" >
-                                            {supply}
+                                            {balance.total_tokens}
                                         </Typography> :
                                         <LinearLoader />}
                                 </div>

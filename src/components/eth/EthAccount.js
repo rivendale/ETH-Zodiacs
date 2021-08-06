@@ -221,13 +221,12 @@ export const payMintingFee = async ({ amountToSend }) => {
 
             })
             .catch(function (error) {
-                if (error.stack.toString().includes("-32000")) {
+                if (error?.stack?.toString().includes("-32000") || error.code?.toString() === "-32000") {
                     errorMessage = ERROR_MAPPER["-32000"]
                 }
                 else {
                     errorMessage = error.message;
                 }
-                // console.log({ error });
                 resolve({ errorMessage })
 
             })

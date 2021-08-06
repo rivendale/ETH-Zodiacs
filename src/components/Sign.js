@@ -280,7 +280,7 @@ export const Sign = ({ history, match }) => {
           <div className={classes.mintingDisplay}>
             <Alert severity="warning">
               <AlertTitle>Warning</AlertTitle>
-              Please connect to Matic Main Network to mint NFT.
+              Please select Matic/Polygon Network in Metamask to mint NFT.
             </Alert>
           </div>
         }

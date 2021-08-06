@@ -431,7 +431,7 @@ export const NFTTable = ({ tokens }) => {
 
                                                 <Box style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                                                     <Box style={{ margin: "auto" }}>
-                                                        <Avatar alt={row.image_url.split('.').pop()} src={row.image_url} className={classes.smallAvatar} />
+                                                        <Avatar alt={row.image_url.split('.').pop()} src={`https://api.allorigins.win/raw?url=${row.image_url}`} className={classes.smallAvatar} />
                                                     </Box>
                                                 </Box>
                                             </TableCell>
