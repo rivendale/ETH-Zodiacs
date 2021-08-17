@@ -4,29 +4,48 @@ import contract from "../../artifacts/contracts/EthsignsToken/EthsignsToken.json
 import api from '../../api';
 import Web3Modal from "web3modal";
 import Web3 from "web3";
+import { ethers } from "ethers";
 
 const contractAddress = config.CONTRACT_ADDRESS
 
 let web3
 let nftContract
 
-const setupWeb3 = async () => {
+export const ethBrowserPresent = async () => {
+
+    return !!(window.ethereum || window.web3)
+}
+
+
+const isMetaMaskConnected = async () => {
+
+    if (await ethBrowserPresent()) {
+        var ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
+        const accounts = await ethersProvider.listAccounts();
+        return !!accounts.length;
+    }
+}
+
+const setupWeb3 = async (connect = false) => {
     // const providerOptions = {
     //     /* See Provider Options Section */
     //   };
-    if (web3) return
-    const web3Modal = new Web3Modal({
-        network: "mainnet",
-        connectTo: config.RPC_API_URL,
-        cacheProvider: true,
-        // providerOptions // required
-    });
+    if (!connect && web3) return
+    const metamaskConnected = await isMetaMaskConnected()
+    if (!metamaskConnected && connect) {
+        const web3Modal = new Web3Modal({
+            network: "mainnet",
+            connectTo: config.RPC_API_URL,
+            cacheProvider: true,
+            // providerOptions // required
+        });
 
-    const provider = await web3Modal.connect();
+        await web3Modal.connect();
+    }
 
-
-    web3 = new Web3(provider);
+    web3 = new Web3(Web3.givenProvider);
     nftContract = new web3.eth.Contract(contract.abi, contractAddress);
+
 }
 
 
@@ -35,8 +54,10 @@ export const validateEthAccount = async (address) => {
     return !web3.utils.isAddress(address)
 }
 export const getChainId = async () => {
-    await setupWeb3()
-    return await web3.eth.getChainId()
+    if (await isMetaMaskConnected()) {
+        await setupWeb3()
+        return await web3.eth.getChainId()
+    }
 }
 
 
@@ -98,25 +119,19 @@ export const addressStats = async (address) => {
     return { stats }
 }
 
-
-export const ethBrowserPresent = async () => {
-
-    return !!(window.ethereum || window.web3)
-}
-
 // ethereum.on('accountsChanged', function(accounts=>{console.log(accounts)}));
 
 export const getAccount = async (connect = false) => {
 
     // let w3
     if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
-        await setupWeb3()
+        await setupWeb3(connect)
         const accounts = await web3.eth.getAccounts()
         return accounts[0] || null
 
     } else if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
         //getting Permission to access
-        await setupWeb3()
+        await setupWeb3(connect)
         if (connect) { window.ethereum.request({ method: 'eth_requestAccounts' }); }
         // web3 = new Web3(window.web3.currentProvider);
         // In legacy MetaMask acccounts are always exposed

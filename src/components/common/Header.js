@@ -26,6 +26,7 @@ import HomeIcon from '@material-ui/icons/Home';
 import ClearAllIcon from '@material-ui/icons/ClearAll';
 import PersonIcon from '@material-ui/icons/Person';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import { readProfile, authenticate3Id } from '../eth/identity';
 
 const drawerWidth = 240;
 
@@ -71,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
 
     },
     mobileAuthButtons: {
-        margin: theme.spacing(2, "auto"),
+        margin: theme.spacing(2, 2, 2, "auto"),
     },
     logo: {
         display: "flex",
@@ -181,11 +182,13 @@ export default function Header() {
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
     const { smDeviceView, mobileView, setMobileDevice, setSmallDevice } = useContext(DeviceContext)
-    const { ethAccount, getEthAccount, accountStats, getAccountStats, getEthChainId } = useContext(EthContext)
+    const { ethAccount, getEthAccount, accountStats,
+        getAccountStats, getEthChainId, identityProfile, setThreeIdProfile } = useContext(EthContext)
     const [setEthBrowserError] = React.useState(false)
     const [accountChecked, setAccountChecked] = React.useState(false)
     const [ethereum, setEthereum] = React.useState(null)
     const [statsChecked, setStatsChecked] = React.useState(false)
+    const [threeIdChecked, setThreeIdChecked] = React.useState(false)
     const [adminSet, setAdminSet] = React.useState(false);
     const [headersData, setHeadersData] = React.useState([...headersRawData])
     let [width, setWidth] = React.useState(getWidth());
@@ -277,11 +280,32 @@ export default function Header() {
             if (isEthBrowserPresent) {
                 const account = await getAccount(true)
                 getEthAccount(account)
+                if (account) {
+                    getChainId().then(chainId => {
+                        getEthChainId(chainId)
+                    })
+                }
             }
             else
                 setEthBrowserError(true)
         }
     };
+    useEffect(() => {
+        if (identityProfile && !identityProfile.name && !threeIdChecked) {
+            authenticate3Id(ethAccount)
+            setThreeIdChecked(true)
+        }
+    }, [ethAccount, identityProfile, threeIdChecked])
+
+    useEffect(() => {
+
+        if (ethAccount && !identityProfile) {
+            readProfile(ethAccount).then(profile => {
+                setThreeIdProfile(profile)
+            })
+        }
+
+    }, [ethAccount, identityProfile, setThreeIdProfile])
     useEffect(() => {
         let timeoutId = null;
         if (window.ethereum.isConnected()) {
@@ -343,7 +367,7 @@ export default function Header() {
                 {accountChecked && !ethAccount &&
 
                     <Button onClick={connectAccount} fullWidth color="primary" variant="outlined" className={classes.authButton}>
-                        Connect with Metamask
+                        Connect Profile
                     </Button>
                 }
 
