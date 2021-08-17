@@ -119,95 +119,99 @@ export const Profile = () => {
         setWithdrawError(null)
     })
     return (
-        <div className={classes.root}>
-            <Container
-                className={classes.content}
-                maxWidth="lg" component="main"
-            >
-                <Typography align="center" variant="h4" component="h4" gutterBottom>
-                    Admin Profile
-                </Typography>
-                <Grid container spacing={3}>
-                    <Grid item xs={4} md={4}>
-                        <CardActionArea component="div">
-                            <Paper className={classes.card}>
-                                <div className={classes.mainCard}>
-                                    <Typography component="h2" variant="h5" gutterBottom>
-                                        Wallet Account
-                                    </Typography>
-                                    {ethAccount ?
-                                        <Typography variant="body2" component="p" >
-                                            {ethAccount.substr(0, 8) + '...' + ethAccount.substr(ethAccount.length - 8, ethAccount.length)}
-                                        </Typography> :
-                                        <LinearLoader />}
-                                </div>
-                            </Paper>
-                        </CardActionArea>
-                    </Grid>
-                    <Grid item xs={4} md={4}>
-                        <CardActionArea component="div">
-                            <Paper className={classes.card}>
-                                <div className={classes.mainCard}>
+        <React.Fragment>
 
-                                    <Typography component="h2" variant="h5" gutterBottom>
-                                        Wallet Balance
-                                    </Typography>
-                                    <Grid container spacing={3} >
+            <div className={classes.root}>
+                <Container
+                    className={classes.content}
+                    maxWidth="lg" component="main"
+                >
+                    <Typography align="center" variant="h4" component="h4" gutterBottom>
+                        Admin Profile
+                    </Typography>
+                    <Grid container spacing={3}>
+                        <Grid item xs={4} md={4}>
+                            <CardActionArea component="div">
+                                <Paper className={classes.card}>
+                                    <div className={classes.mainCard}>
+                                        <Typography component="h2" variant="h5" gutterBottom>
+                                            Wallet Account
+                                        </Typography>
+                                        {ethAccount ?
+                                            <Typography variant="body2" component="p" >
+                                                {ethAccount.substr(0, 8) + '...' + ethAccount.substr(ethAccount.length - 8, ethAccount.length)}
+                                            </Typography> :
+                                            <LinearLoader />}
+                                    </div>
+                                </Paper>
+                            </CardActionArea>
+                        </Grid>
+                        <Grid item xs={4} md={4}>
+                            <CardActionArea component="div">
+                                <Paper className={classes.card}>
+                                    <div className={classes.mainCard}>
 
-                                        <Grid item xs={12} sm={6}>
-                                            {balance ?
-                                                <Typography variant="body2" component="p" >
-                                                    {balance?.wallet_balance} Matic
-                                                </Typography> :
-                                                <LinearLoader />}                                        </Grid>
-                                        {!!(balance?.wallet_balance && +balance?.wallet_balance > 0) &&
+                                        <Typography component="h2" variant="h5" gutterBottom>
+                                            Wallet Balance
+                                        </Typography>
+                                        <Grid container spacing={3} >
+
                                             <Grid item xs={12} sm={6}>
-                                                <Grid container direction="row" justify="flex-end">
-                                                    {withdrawing ?
-                                                        <Spinner /> :
-                                                        <Fab style={{ textTransform: "none" }} onClick={handleWithdraw} variant="extended" color="primary" aria-label="withdraw">
-                                                            <GetAppIcon className={classes.extendedIcon} />
-                                                            Withdraw
-                                                        </Fab>
-                                                    }
-                                                </Grid>
-                                            </Grid>}
-                                    </Grid>
+                                                {balance ?
+                                                    <Typography variant="body2" component="p" >
+                                                        {balance?.wallet_balance} Matic
+                                                    </Typography> :
+                                                    <LinearLoader />}                                        </Grid>
+                                            {!!(balance?.wallet_balance && +balance?.wallet_balance > 0) &&
+                                                <Grid item xs={12} sm={6}>
+                                                    <Grid container direction="row" justify="flex-end">
+                                                        {withdrawing ?
+                                                            <Spinner /> :
+                                                            <Fab style={{ textTransform: "none" }} onClick={handleWithdraw} variant="extended" color="primary" aria-label="withdraw">
+                                                                <GetAppIcon className={classes.extendedIcon} />
+                                                                Withdraw
+                                                            </Fab>
+                                                        }
+                                                    </Grid>
+                                                </Grid>}
+                                        </Grid>
 
-                                </div>
-                            </Paper>
-                        </CardActionArea>
-                    </Grid>
-                    <Grid item xs={4} md={4}>
-                        <CardActionArea component="div">
-                            <Paper className={classes.card}>
-                                <div className={classes.mainCard}>
-                                    <Typography component="h2" variant="h5" gutterBottom>
-                                        Total Tokens Minted
-                                    </Typography>
-                                    {!!(balance?.total_tokens)
-                                        ?
-                                        <Typography variant="body2" component="p" >
-                                            {balance.total_tokens}
-                                        </Typography> :
-                                        <LinearLoader />}
-                                </div>
-                            </Paper>
-                        </CardActionArea>
-                    </Grid>
-                    {txHash &&
-                        <Typography style={{ margin: "auto" }} variant="body2" component="p" align="center" >
-                            Your transaction is being processed. For more details, click <a rel="noopener noreferrer" href={`${Config.TX_EXPLORER}/${txHash}`} target="_blank">here</a> to view it.
-                        </Typography>
-                    }
-                    {withdrawError &&
-                        <div style={{ paddingLeft: "33.3%", width: "100%", }}>
-                            <AlertMessage message={withdrawError} handleMessageClick={handleMessageClick} />
-                        </div>
-                    }
+                                    </div>
+                                </Paper>
+                            </CardActionArea>
+                        </Grid>
+                        <Grid item xs={4} md={4}>
+                            <CardActionArea component="div">
+                                <Paper className={classes.card}>
+                                    <div className={classes.mainCard}>
+                                        <Typography component="h2" variant="h5" gutterBottom>
+                                            Total Tokens Minted
+                                        </Typography>
+                                        {!!(balance?.total_tokens)
+                                            ?
+                                            <Typography variant="body2" component="p" >
+                                                {balance.total_tokens}
+                                            </Typography> :
+                                            <LinearLoader />}
+                                    </div>
+                                </Paper>
+                            </CardActionArea>
+                        </Grid>
+                        {txHash &&
+                            <Typography style={{ margin: "auto" }} variant="body2" component="p" align="center" >
+                                Your transaction is being processed. For more details, click <a rel="noopener noreferrer" href={`${Config.TX_EXPLORER}/${txHash}`} target="_blank">here</a> to view it.
+                            </Typography>
+                        }
+                        {withdrawError &&
+                            <div style={{ paddingLeft: "33.3%", width: "100%", }}>
+                                <AlertMessage message={withdrawError} handleMessageClick={handleMessageClick} />
+                            </div>
+                        }
 
-                </Grid>
-            </Container>
-        </div>
+                    </Grid>
+                </Container>
+            </div>
+
+        </React.Fragment>
     );
 }

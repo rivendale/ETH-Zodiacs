@@ -36,3 +36,4 @@ MyNFT.sol/
 Minty.dbg.json
 hardhat/
 compose/
+*.rdb

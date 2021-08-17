@@ -6,6 +6,7 @@ const initialState = {
     ethTokens: null,
     accountStats: null,
     chainId: null,
+    identityProfile: null,
 };
 
 function ethReducer(state, action) {
@@ -34,6 +35,11 @@ function ethReducer(state, action) {
             return {
                 ...state,
                 chainId: action.payload
+            };
+        case "GET_THREE_ID_PROFILE":
+            return {
+                ...state,
+                identityProfile: action.payload
             };
         default:
             return state;
@@ -74,6 +80,12 @@ export const EthProvider = ({ children }) => {
             payload: data
         });
     }
+    function setThreeIdProfile(data) {
+        dispatch({
+            type: "GET_THREE_ID_PROFILE",
+            payload: data
+        });
+    }
     return (
         <EthContext.Provider
             value={{
@@ -82,11 +94,13 @@ export const EthProvider = ({ children }) => {
                 ethTokens: state.ethTokens,
                 accountStats: state.accountStats,
                 chainId: state.chainId,
+                identityProfile: state.identityProfile,
                 getEthAccount,
                 getEthTokenIds,
                 getEthTokens,
                 getAccountStats,
                 getEthChainId,
+                setThreeIdProfile
             }}>
             {children}
         </EthContext.Provider>
