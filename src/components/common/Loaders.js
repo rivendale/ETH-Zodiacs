@@ -2,7 +2,8 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Backdrop from '@material-ui/core/Backdrop';
-import { LinearProgress } from '@material-ui/core';
+import { Grow, LinearProgress, Snackbar } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
     backdrop: {
@@ -63,3 +64,15 @@ export const LinearLoader = () => {
         </div>
     );
 }
+
+export const SnackBar = ({ successMessage, errorMessage, handleCloseSnackbar: handleClose, snackBarOpen: open }) => {
+
+    return (
+        <Snackbar TransitionComponent={Grow} open={open} autoHideDuration={6000} onClose={handleClose}>
+            <Alert onClose={handleClose} severity={successMessage ? "success" : "error"}>
+                {successMessage ? successMessage : errorMessage ? errorMessage : ""}
+            </Alert>
+        </Snackbar>
+    );
+}
+

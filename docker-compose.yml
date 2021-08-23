@@ -17,6 +17,8 @@ services:
       REACT_APP_RPC_API_URL: ${REACT_APP_RPC_API_URL}
       REACT_APP_CONTRACT_ADDRESS: ${REACT_APP_CONTRACT_ADDRESS}
       REACT_APP_TRANSACTION_EXPLORER: ${REACT_APP_TRANSACTION_EXPLORER}
+      REACT_APP_CLOUDINARY_URL: ${REACT_APP_CLOUDINARY_URL}
+      REACT_APP_CLOUDINARY_PRESET: ${REACT_APP_CLOUDINARY_PRESET}
     volumes:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt/:/etc/letsencrypt/
