@@ -68,5 +68,5 @@ export const updateProfile = async (address, userData) => {
 
     await idx.set('basicProfile', userData)
 
-    console.log("Profile updated!")
+    return await idx.get('basicProfile', `${address}@eip155:1`)
 }

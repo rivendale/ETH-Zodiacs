@@ -271,7 +271,7 @@ export const Sign = ({ history, match }) => {
         <SignHeader post={{ title: sign.name, description: sign.description, image: sign.image_url }} />
         {transactionHash && <span>
           Your transaction is being processed. For more details, click <a rel="noopener noreferrer" href={`${Config.TX_EXPLORER}/${transactionHash}`} target="_blank">here</a> to view it <br />
-          Your minted NFT should be listed in your <a href="/my-signs">NFT page</a> within 5 minutes of the transaction completion.
+          Your minted NFT should be listed in your <a href="/profile">NFT page</a> within 5 minutes of the transaction completion.
         </span>}
         {mintingError &&
           <AlertMessage message={mintingError} handleMessageClick={handleMessageClick} />

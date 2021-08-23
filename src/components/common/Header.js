@@ -21,12 +21,12 @@ import {
     getAccount, getConnectedAccount,
     getChainId
 } from '../eth/EthAccount';
-import { EthIcon } from './EthIcon';
 import HomeIcon from '@material-ui/icons/Home';
 import ClearAllIcon from '@material-ui/icons/ClearAll';
 import PersonIcon from '@material-ui/icons/Person';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import { readProfile, authenticate3Id } from '../eth/identity';
+import { StyledBadge } from './StyledBadge';
 
 const drawerWidth = 240;
 
@@ -63,6 +63,7 @@ const useStyles = makeStyles((theme) => ({
     },
     authButton: {
         margin: theme.spacing("auto", 3),
+        padding: theme.spacing(1, 2.5),
         textTransform: "none",
         borderRadius: ".9em",
         whiteSpace: "nowrap",
@@ -133,6 +134,7 @@ const useStyles = makeStyles((theme) => ({
     username: {
         // fontSize: "10px",
         margin: theme.spacing("auto", 1),
+        whiteSpace: "nowrap",
     },
     // fontSize: "10px",
     rounded: {
@@ -153,6 +155,14 @@ const useStyles = makeStyles((theme) => ({
         margin: theme.spacing("auto", 1),
         color: "#A09FB2"
     },
+    icon: {
+        width: "1.4em",
+        borderRadius: "50%",
+        border: '1px solid #018AF2'
+    },
+    displayNone: {
+        display: 'none',
+    },
 }));
 const headersRawData = [
     {
@@ -166,8 +176,8 @@ const headersRawData = [
         icon: <ClearAllIcon />,
     },
     {
-        label: "My Assets",
-        href: "/my-signs",
+        label: "Profile",
+        href: "/profile",
         icon: <PersonIcon />,
     },
 ];
@@ -189,9 +199,11 @@ export default function Header() {
     const [ethereum, setEthereum] = React.useState(null)
     const [statsChecked, setStatsChecked] = React.useState(false)
     const [threeIdChecked, setThreeIdChecked] = React.useState(false)
+    const [profileFetched, setProfileFetched] = React.useState(false)
     const [adminSet, setAdminSet] = React.useState(false);
     const [headersData, setHeadersData] = React.useState([...headersRawData])
     let [width, setWidth] = React.useState(getWidth());
+
     const handleDrawerOpen = () => {
         setOpen(true);
     };
@@ -199,7 +211,6 @@ export default function Header() {
     const handleDrawerClose = () => {
         setOpen(false);
     };
-
 
     // save current window width in the state object
 
@@ -299,13 +310,15 @@ export default function Header() {
 
     useEffect(() => {
 
-        if (ethAccount && !identityProfile) {
+        if (ethAccount && !identityProfile && !profileFetched) {
             readProfile(ethAccount).then(profile => {
                 setThreeIdProfile(profile)
+                setProfileFetched(true)
             })
         }
 
-    }, [ethAccount, identityProfile, setThreeIdProfile])
+    }, [ethAccount, identityProfile, profileFetched, setThreeIdProfile])
+
     useEffect(() => {
         let timeoutId = null;
         if (window.ethereum.isConnected()) {
@@ -315,18 +328,21 @@ export default function Header() {
         timeoutId = setTimeout(() => {
             ethereum?.on('accountsChanged', (accounts) => {
                 getEthAccount(accounts[0])
+                readProfile(ethAccount).then(profile => {
+                    setThreeIdProfile(profile)
+                })
             });
             ethereum?.on('chainChanged', (chain) => {
                 getEthChainId(parseInt(chain, 16))
             });
         }, 150);
 
-    }, [ethereum, getEthAccount, getEthChainId])
+    }, [ethAccount, ethereum, getEthAccount, getEthChainId, setThreeIdProfile])
     useEffect(() => {
 
         const adminNav = {
             label: "Admin",
-            href: "/profile",
+            href: "/manage",
             icon: <SupervisorAccountIcon />,
         }
         if (ethAccount && accountStats) {
@@ -359,9 +375,31 @@ export default function Header() {
             <div>
                 {ethAccount &&
                     <Fragment>
-                        <Typography style={{ margin: ".8em" }} variant="body2" noWrap >
+                        <Fragment>
+                            <IconButton
+                                color="inherit"
+                            >
+                                {/* <AccountCircle /> */}
+                                <StyledBadge
+                                    overlap="circle"
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right',
+                                    }}
+                                    variant="dot"
+                                >
+                                    <img className={classes.icon} alt="Etherium" src={identityProfile?.avatar || "/assets/images/ethereum.svg"} />
+                                    {/* <Avatar style={{ border: '1px solid #018AF2' }} alt={"user.username"} src={"user.profile.image " ? "user.profile.image " : "."} /> */}
+                                </StyledBadge>
+                                <Typography className={classes.username} variant="subtitle1" component="p" gutterBottom>
+                                    {identityProfile && identityProfile.name ? identityProfile?.name + ` [${ethAccount.substr(ethAccount.length - 4, ethAccount.length)}]` : ethAccount.substr(0, 6) + '...' + ethAccount.substr(ethAccount.length - 4, ethAccount.length)}
+                                </Typography>
+                            </IconButton>
+                        </Fragment>
+
+                        {/* <Typography style={{ margin: ".8em" }} variant="body2" noWrap >
                             <EthIcon id="eth-account" ethAccount={ethAccount} />
-                        </Typography>
+                        </Typography> */}
                     </Fragment>}
 
                 {accountChecked && !ethAccount &&
@@ -396,13 +434,14 @@ export default function Header() {
                             {accountStats.remaining_mints} mints remaining
                         </Button>
                         {!!(accountStats && accountStats.pending_mints) &&
-                            <Button fullWidth color="primary" variant="outlined" className={clsx(classes.authButton, classes.mobileAuthButtons)}>
-                                {accountStats.pending_mints} mints remaining
+                            <Button fullWidth color="secondary" variant="outlined" className={clsx(classes.authButton, classes.mobileAuthButtons)}>
+                                {accountStats.pending_mints} pending mints
                             </Button>}
                     </Box>}
             </Fragment>
         )
     }
+
 
     return (
         <div className={classes.root}>
@@ -441,22 +480,34 @@ export default function Header() {
                     {!mobileView && <Fragment>
                         <Box className={classes.navigation}>{navigationButtons()}</Box>
                         <Box className={classes.authButtons}>
-                            {accountStats &&
-                                <Button fullWidth color="primary" variant="outlined" className={classes.authButton}>
+                            {accountStats && width > 1225 &&
+                                <Button fullWidth color="primary" variant="outlined" className={clsx(classes.authButton, !!(width < 1521 && accountStats.pending_mints) && classes.displayNone)}>
                                     {accountStats.tokens_minted} tokens minted
                                 </Button>}
-                            {accountStats &&
-                                <Button fullWidth color="primary" variant="outlined" className={classes.authButton}>
+                            {accountStats && width > 1225 &&
+                                <Button fullWidth color="primary" variant="outlined" className={clsx(classes.authButton, !!(width < 1521 && accountStats.pending_mints) && classes.displayNone)}>
                                     {accountStats.remaining_mints} mints remaining
                                 </Button>}
                             {!!(accountStats && accountStats.pending_mints) &&
-                                <Button fullWidth color="primary" variant="outlined" className={classes.authButton}>
-                                    {accountStats.pending_mints} mints remaining
+                                <Button fullWidth color="secondary" variant="outlined" className={classes.authButton}>
+                                    {accountStats.pending_mints} pending mint
                                 </Button>
                             }
                             {balanceModule()}
                             {profileModule()}
                         </Box>
+                    </Fragment>}
+                    {mobileView && <Fragment>
+                        {!!(accountStats && accountStats.pending_mints) &&
+                            <Box className={classes.authButtons}>
+
+                                {!!(accountStats && accountStats.pending_mints) &&
+                                    <Button fullWidth color="secondary" variant="outlined" className={classes.authButton}>
+                                        {accountStats.pending_mints} pending mints
+                                    </Button>
+                                }
+                            </Box>
+                        }
                     </Fragment>}
                 </Toolbar>
             </AppBar>

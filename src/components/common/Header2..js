@@ -131,7 +131,7 @@ export default function Header(props) {
                                     </Button>
                                 </Grid>
                                 <Grid item xs={1}>
-                                    <Button href="/my-signs" color="primary" variant="text" className={classes.link}>
+                                    <Button href="/profile" color="primary" variant="text" className={classes.link}>
                                         My Signs
                                     </Button>
                                 </Grid>
@@ -205,7 +205,7 @@ export default function Header(props) {
                             open={open}
                             onClose={handleClose}
                         >
-                            <MenuItem onClick={() => handleRedirect("/profile")}>Profile</MenuItem>
+                            <MenuItem onClick={() => handleRedirect("/manage")}>Profile</MenuItem>
                             <MenuItem onClick={handleClose}>Logout</MenuItem>
                         </Menu>
                     </div>}
