@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from '../config';
 
 export const client = axios.create({
-  baseURL: "https://zodiacs.club/api/v1/",
+  baseURL: config.BASE_URL,
   headers: {
     'Content-Type': 'application/json'
   },
