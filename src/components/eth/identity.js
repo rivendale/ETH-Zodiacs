@@ -66,7 +66,10 @@ export const updateProfile = async (address, userData) => {
 
     const idx = new IDX({ ceramic })
 
-    await idx.set('basicProfile', userData)
-
+    try {
+        await idx.set('basicProfile', userData)
+    } catch (error) {
+        console.log('error: ', error)
+    }
     return await idx.get('basicProfile', `${address}@eip155:1`)
 }

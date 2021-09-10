@@ -22,7 +22,7 @@ import {
     getChainId
 } from '../eth/EthAccount';
 import HomeIcon from '@material-ui/icons/Home';
-import ClearAllIcon from '@material-ui/icons/ClearAll';
+// import ClearAllIcon from '@material-ui/icons/ClearAll';
 import PersonIcon from '@material-ui/icons/Person';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import { readProfile, authenticate3Id } from '../eth/identity';
@@ -170,13 +170,13 @@ const headersRawData = [
         href: "/",
         icon: <HomeIcon />,
     },
+    // {
+    //     label: "All Signs",
+    //     href: "/year-signs",
+    //     icon: <ClearAllIcon />,
+    // },
     {
-        label: "All Signs",
-        href: "/year-signs",
-        icon: <ClearAllIcon />,
-    },
-    {
-        label: "Profile",
+        label: "My Profile",
         href: "/profile",
         icon: <PersonIcon />,
     },
@@ -321,7 +321,7 @@ export default function Header() {
 
     useEffect(() => {
         let timeoutId = null;
-        if (window.ethereum.isConnected()) {
+        if (window?.ethereum?.isConnected()) {
             setEthereum(window.ethereum)
         }
         clearTimeout(timeoutId);
@@ -405,7 +405,7 @@ export default function Header() {
                 {accountChecked && !ethAccount &&
 
                     <Button onClick={connectAccount} fullWidth color="primary" variant="outlined" className={classes.authButton}>
-                        Connect Profile
+                        Connect Metamask Profile
                     </Button>
                 }
 
@@ -474,7 +474,7 @@ export default function Header() {
                         </Link>
                         {!smDeviceView &&
                             <Button component={RouterLink} fullWidth to="/" className={classes.logoText}>
-                                NFT Zodiacs
+                                Zodiacs Club
                             </Button>}
                     </Box>
                     {!mobileView && <Fragment>

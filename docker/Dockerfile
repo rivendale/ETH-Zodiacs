@@ -1,49 +1,56 @@
-# Multi-stage
-# 1) Node image for building frontend assets
-# 2) nginx stage to serve frontend assets
 
-# Name the node stage "builder"
-FROM node:15-alpine as builder
+# set the base image
+# n/b: for production, node is only used for building
+# the static Html and javascript files
+# as react creates static html and js files after build
+# these are what will be served by nginx
+# use alias build to be easier to refer this container elsewhere
+# e.g inside nginx container
 
-# Set working app directory
-WORKDIR /app
+FROM node:15.11 as build-deps
 
-# Copy both package.json AND package-lock.json
+# set working directory
+# this is the working folder in the container
+# from which the app will be running from
+
+WORKDIR /usr/src/app
+
+# Copy both package.json AND yarn.lock
 COPY package.json yarn.lock ./
 
 # Install production dependencies
+
 RUN yarn
 
-COPY . .
-
-
 # Buncdle app source
+
+COPY . ./
+
+# Build Application
 RUN yarn build
 
+# set up production environment
+# the base image for this is an alpine based nginx image
 
-# nginx state for serving content
-FROM nginx:1.19.0
+FROM nginx:1.21-alpine
 
-# Set working directory to nginx asset directory
-# WORKDIR /usr/share/nginx/html
-# Remove default nginx static assets
-# RUN rm -rf ./*
+ENV NODE_ENV=production
 
-# Copy static assets from builder stage
-COPY --from=builder /app/build /usr/share/nginx/html
+# copy the build folder from react to the root of nginx (www)
 
-# Copy nginx config
-COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build-deps /usr/src/app/build /usr/share/nginx/html
+# --------- because we are using react router ----------
+# because we are using react router
+# we need to overwrite the default nginx configurations
+# remove default nginx configuration file
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Expose port
+# replace with custom one
+COPY ./docker/nginx.conf /etc/nginx/conf.d
+
+# --------- /because we are using react router ----------
+
+# expose port 80 to the outer world
 EXPOSE 80
-
-# Containers run nginx with global directives and daemon off
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
-
-
-# ENV NODE_ENV=production
-
-# COPY --from=builder /app/build /usr/share/nginx/html
-# EXPOSE 80
-
+# start nginx
+CMD ["nginx", "-g", "daemon off;"]

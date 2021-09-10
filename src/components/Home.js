@@ -1,7 +1,6 @@
 import React, { useState, useContext, Fragment, useEffect } from "react";
 import {
     colors,
-    Avatar,
     CssBaseline,
     Typography,
     Container,
@@ -14,6 +13,7 @@ import {
     CardMedia,
     CardContent,
     CardActions,
+    Paper,
 } from '@material-ui/core';
 import { useHistory } from 'react-router';
 import {
@@ -51,12 +51,17 @@ const theme = createMuiTheme({
 });
 const useStyles = makeStyles((theme) => ({
     root: {
-        // height: "60vh",
 
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         // margin: theme.spacing("auto"
+    },
+    nfts: {
+        minHeight: theme.spacing(40),
+        [theme.breakpoints.down("xs")]: {
+            minHeight: theme.spacing(20)
+        },
     },
     paper: {
         marginTop: theme.spacing(8),
@@ -74,6 +79,15 @@ const useStyles = makeStyles((theme) => ({
     },
     submit: {
         margin: theme.spacing(3, 0, 2),
+    },
+    pageTitle: {
+        color: "#312E58",
+        fontWeight: " bold",
+        fontSize: " 1.8em",
+        textTransform: " capitalize",
+        margin: ".9em",
+        padding: theme.spacing(2),
+        width: "100%",
     },
     cardDetail: {
         display: 'flex',
@@ -238,9 +252,10 @@ export const Home = () => {
             <Container component="main" maxWidth="lg" className={classes.root}>
                 <CssBaseline />
                 <div className={classes.paper}>
-                    <Avatar className={classes.avatar}></Avatar>
-                    <Typography component="h1" variant="h5">
-                        Enter your Date of birth
+                    <Typography>
+                        <b>
+                            Enter your Date of birth and get your NFT
+                        </b>
                     </Typography>
                     <Container maxWidth="xs">
                         <form className={classes.form} noValidate onSubmit={handleSubmit}>
@@ -282,14 +297,25 @@ export const Home = () => {
                             </Button>
                         </form>
                     </Container>
-                    {nfts && <Typography
-                        style={{ color: "#312E58", fontWeight: " bold", fontSize: " 1.8em", textTransform: " capitalize", margin: ".9em" }}
+                    {!nfts?.total && <Typography
+                        className={classes.pageTitle}
                         variant="h5"
                         color="textSecondary"
+                        component={Paper}
+                        elevation={2}
                         align="center">
-                        Here are some minted signs
+                        Be the first to mint your own Zodiac Sign NFT!
                     </Typography>}
-                    <Container maxWidth="lg">
+                    {!!nfts?.total && <Typography
+                        className={classes.pageTitle}
+                        variant="h5"
+                        color="textSecondary"
+                        component={Paper}
+                        elevation={2}
+                        align="center">
+                        Here are some minted zodiac signs
+                    </Typography>}
+                    <Container maxWidth="lg" className={classes.nfts}>
                         <Grid container spacing={3}>
                             {nfts && nfts.items.map((nft, k) =>
                                 <Grid item key={k} xs={12} sm={6} md={4} className={classes.mainCard}>

@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { Typography, Container, Grid, makeStyles, Fab } from '@material-ui/core';
+import { Typography, Container, Grid, makeStyles, Fab, Box, Paper, Button } from '@material-ui/core';
 import SignHeader from './SignHeader';
 import Compatibility from './Compatibility.js';
 import Main from './Report';
@@ -8,7 +8,7 @@ import Sidebar from './Sidebar';
 import { GlobalContext } from "../context/GlobalState";
 import api from '../api';
 import { LinearLoader, SimpleBackdrop, Spinner } from './common/Loaders';
-import { ethBrowserPresent, getAccount, payMintingFee, verifyMinted } from './eth/EthAccount';
+import { ethBrowserPresent, getAccount, getChainId, payMintingFee, verifyMinted } from './eth/EthAccount';
 import Message from './common/MessageDialog';
 import VerifiedUserOutlinedIcon from '@material-ui/icons/VerifiedUserOutlined';
 import DeviceHubOutlinedIcon from '@material-ui/icons/DeviceHubOutlined';
@@ -19,7 +19,7 @@ import moment from "moment";
 import { Error404Page } from './common/Error404Page';
 import Alert from '@material-ui/lab/Alert';
 import { AlertTitle } from '@material-ui/lab';
-
+import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 
 const useStyles = makeStyles((theme) => ({
   mainGrid: {
@@ -43,13 +43,32 @@ const useStyles = makeStyles((theme) => ({
       width: "100%",
     }
   },
+  maticLogo: {
+    width: theme.spacing(2),
+    height: theme.spacing(2),
+    margin: theme.spacing("auto", 1, "auto", 2),
+
+  },
+  mintingFee: {
+    margin: theme.spacing("auto", 0),
+  },
+  mintingFeeDisplay: {
+    padding: theme.spacing(1),
+  },
+  editButton: {
+    textTransform: "none",
+    borderRadius: ".7em",
+    whiteSpace: "nowrap",
+    border: '1px solid #018AF2',
+    color: "#312E58",
+  },
 }));
 
 
 export const Sign = ({ history, match }) => {
   const classes = useStyles();
   const { yearSigns, sign, getYearSigns, getSign } = useContext(GlobalContext);
-  const { ethAccount, accountStats, getAccountStats, chainId } = useContext(EthContext);
+  const { ethAccount, accountStats, getAccountStats, chainId, getEthAccount, getEthChainId } = useContext(EthContext);
   const [bestCompatibility, setBestCompatibility] = useState([]);
   const [worstCompatibility, setWorstCompatibility] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -185,6 +204,26 @@ export const Sign = ({ history, match }) => {
       behavior: 'smooth'
     });
   }
+  useEffect(() => {
+    ethBrowserPresent().then(res => { setEthBrowserError(!res) })
+  }, [])
+
+  const connectAccount = async () => {
+    if (!ethAccount) {
+      const isEthBrowserPresent = await ethBrowserPresent()
+      if (isEthBrowserPresent) {
+        const account = await getAccount(true)
+        getEthAccount(account)
+        if (account) {
+          getChainId().then(chainId => {
+            getEthChainId(chainId)
+          })
+        }
+      }
+      else
+        setEthBrowserError(true)
+    }
+  };
 
   const mintSign = useCallback(async (txHash) => {
     const dob = moment(new Date(localStorage.getItem("dob"))).format('YYYY-MM-DD')
@@ -284,18 +323,37 @@ export const Sign = ({ history, match }) => {
             </Alert>
           </div>
         }
+        {!ethAccount && !ethBrowserError &&
+          <Box>
+            <Button startIcon={<SettingsEthernetIcon color="primary" />} onClick={connectAccount} variant="outlined" className={classes.editButton}>
+              Connect your wallet to mint NFT
+            </Button>
+          </Box>}
         {!!(chainId && chainId === 137) && !transactionHash && sign && sign.day_animal &&
           <span>
             {sign.minted ?
-              <Fab size="small" variant="extended" className={classes.mintedIcon} >
-                <VerifiedUserOutlinedIcon className={classes.extendedIcon} />
-                Minted
-              </Fab>
+              <Button startIcon={<VerifiedUserOutlinedIcon color="secondary" />} onClick={connectAccount} variant="outlined" className={classes.editButton}>
+                NFT Minted
+              </Button>
               : !minting && !mintingError ?
-                <Fab onClick={handleMintNFT} size="small" disabled={minting} variant="extended" style={{ textTransform: "none" }}>
-                  <DeviceHubOutlinedIcon className={classes.extendedIcon} />
-                  Mint NFT
-                </Fab>
+                <Grid container spacing={2}>
+                  <Grid item sm={12} md={2}>
+                    <Fab onClick={handleMintNFT} size="large" disabled={minting} variant="extended" style={{ textTransform: "none", padding: "1.2em" }}>
+                      <DeviceHubOutlinedIcon className={classes.extendedIcon} />
+                      Mint NFT
+                    </Fab>
+                  </Grid>
+                  <Grid item sm={12} md={10}>
+                    <Box component="span" display="flex" justifyContent="center" alignItems="left" className={classes.mintingDisplay}>
+                      <Box elevation={2} component={Paper} display="flex" justifyContent="left" alignItems="left" className={classes.mintingFeeDisplay}>
+                        <img src={"/assets/images/polygon-matic-logo.svg"} alt="minting" className={classes.maticLogo} />
+                        <Typography className={classes.mintingFee}>
+                          Mint this NFT for <b>{sign.minting_fee} Matic</b>  and Join the club
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                </Grid>
                 : minting ?
                   <div className={classes.mintingDisplay}>
                     Minting NFT... (Do not exit this page)

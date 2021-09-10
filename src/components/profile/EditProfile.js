@@ -232,7 +232,6 @@ export const EditProfile = (props) => {
                 setUploading(false)
             })
     }
-
     if (identityProfile && !values.profileFetched) {
         setValues({
             ...values, ...identityProfile,
@@ -257,8 +256,10 @@ export const EditProfile = (props) => {
         const profile = {
             name: values.name,
             description: values.description,
-            birthDate: moment(values.birthDate).format("YYYY-MM-DD"),
             avatar: values.avatar,
+        }
+        if (values.birthDate) {
+            profile.birthDate = moment(values.birthDate).format("YYYY-MM-DD")
         }
         setUpdatingProfile(true)
         updateProfile(ethAccount, profile).then((data) => {

@@ -237,7 +237,7 @@ export const payMintingFee = async ({ amountToSend }) => {
             })
             .catch(function (error) {
                 if (error?.stack?.toString().includes("-32000") || error.code?.toString() === "-32000") {
-                    errorMessage = ERROR_MAPPER["-32000"]
+                    errorMessage = `Insufficient funds in your account. ${amountToSend} Matic required for minting`
                 }
                 else {
                     errorMessage = error.message;

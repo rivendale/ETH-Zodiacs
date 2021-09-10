@@ -9,8 +9,8 @@ function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
             {'Copyright © '}
-            <Link color="inherit" href="http://ethzodiacs.com/">
-                <b>NFT Zodiacs</b>
+            <Link color="inherit" href="http://zodiacs.club/">
+                <b>Zodiacs Club</b>
             </Link>{' '}
             {new Date().getFullYear()}
             {'.'}
@@ -33,7 +33,7 @@ export default function Footer() {
         <footer className={classes.footer}>
             <Container maxWidth="lg">
                 <Typography variant="h6" align="center" gutterBottom>
-                    NFT Zodiacs
+                    Zodiacs Club
                 </Typography>
                 <Typography variant="subtitle1" align="center" color="textSecondary" component="p">
                     Chinese zodiac signs
