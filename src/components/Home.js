@@ -199,12 +199,14 @@ const useStyles = makeStyles((theme) => ({
     },
     carouselCard: {
         display: 'flex',
-        minHeight: theme.spacing(45),
+        // minHeight: theme.spacing(45),
     },
     carouselCardDetails: {
         flex: 1,
         width: "100%",
         padding: theme.spacing(2),
+        display: "grid",
+        minHeight: theme.spacing(40),
     },
     carouselCardMedia: {
         width: 300,
@@ -389,7 +391,10 @@ export const Home = () => {
                                 <CardActionArea component="div">
                                     <Card className={classes.carouselCard}>
                                         <div className={classes.carouselCardDetails}>
-                                            <CardContent>
+
+                                            <CardContent
+                                                style={{ gridArea: "1 / 1", zIndex: "1" }}
+                                            >
                                                 <Typography component="h2" variant="h5">
                                                     <b>
                                                         {item.name}
@@ -399,9 +404,27 @@ export const Home = () => {
                                                     {item.description}
                                                 </Typography>
                                             </CardContent>
+                                            <Hidden smUp>
+                                                <CardMedia
+                                                    component="div"
+                                                    style={{ gridArea: "1 / 1", filter: "blur(2px)" }}
+                                                    title={item.name}
+
+                                                >
+                                                    <BackgroundImage
+                                                        src={item.imgUrl}
+                                                        width="100%"
+                                                        height="100%"
+                                                        alt={item.name}
+                                                        isResponsive
+                                                        className={classes.cardImage}
+                                                        lazyLoad
+                                                    />
+                                                </CardMedia>
+                                            </Hidden>
                                         </div>
                                         <Hidden xsDown>
-                                            <CardMedia className={classes.carouselCardMedia} image={item.imgUrl} title={"ost.imageTitle"} />
+                                            <CardMedia className={classes.carouselCardMedia} image={item.imgUrl} title={item.name} />
                                         </Hidden>
                                     </Card>
                                 </CardActionArea>
