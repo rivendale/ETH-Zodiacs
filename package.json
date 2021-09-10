@@ -33,6 +33,7 @@
     "react-image-and-background-image-fade": "^1.0.6",
     "react-image-crop": "^8.6.12",
     "react-lazyload": "^3.2.0",
+    "react-material-ui-carousel": "^2.3.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "typeface-poppins": "^1.1.13",
