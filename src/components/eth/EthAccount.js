@@ -210,18 +210,18 @@ export const payMintingFee = async ({ amountToSend }) => {
 
         nftContract.methods.sendPayment().estimateGas(rawTransaction)
             .then(async function (gasAmount) {
-                rawTransaction.gas = web3.utils.toHex(parseInt(gasAmount * 1.8))
+                rawTransaction.gas = web3.utils.toHex(parseInt(gasAmount * 1))
                 rawTransaction.gasPrice = web3.utils.toHex(await web3.eth.getGasPrice())
-                rawTransaction.gasLimit = web3.utils.toHex(parseInt(gasAmount * 2.5))
+                rawTransaction.gasLimit = web3.utils.toHex(parseInt(gasAmount * 2))
 
                 nftContract.methods.sendPayment().send(rawTransaction)
                     .once('transactionHash', function (hash) {
                         transactionHash = hash; console.log({ hash });
+                        resolve({ transactionHash })
                     })
                     .once('receipt', function (receipt) {
                         console.log({ receipt });
-                        transactionHash = receipt.transactionHash;
-                        resolve({ transactionHash })
+                        // transactionHash = receipt.transactionHash;
                     })
                     .on('error', function (error) {
                         if (ERROR_MAPPER.hasOwnProperty(error.code?.toString())) {
