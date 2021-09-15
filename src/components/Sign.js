@@ -110,12 +110,11 @@ export const Sign = ({ history, match }) => {
   const fetchSign = useCallback(async () => {
     // use the await keyword to grab the resolved promise value
     // remember: await can only be used within async functions!
-    setSpinnerOpen(true)
-    let dateOfBirth = new Date(userDob);
     let ethAcc = ethAccount || ""
+    const { month, day, year } = userDob
     await api({
       method: "GET",
-      url: `signs/query/?year=${dateOfBirth.getFullYear()}&month=${dateOfBirth.getMonth() + 1}&day=${dateOfBirth.getUTCDate() + 1}&address=${ethAcc}`
+      url: `signs/query/?year=${year}&month=${month}&day=${day}&address=${ethAcc}`
     }).then(data => {
       // update local state with the retrieved data
       getSign(data.data.sign)
@@ -148,7 +147,13 @@ export const Sign = ({ history, match }) => {
       else {
         const validDate = new Date(moment(dob, "MM-DD-YYYY"))
         if (new Date(moment().format("MM-DD-YYYY")) < validDate) setInvalidDate(true)
-        else setUserDob(validDate.toString())
+        else {
+          const checked = moment(dob, "MM-DD-YYYY")
+          const month = checked.format('M');
+          const day = checked.format('D');
+          const year = checked.format('YYYY');
+          setUserDob({ month, day, year })
+        }
       }
       setDateChecked(true)
     }
@@ -224,13 +229,11 @@ export const Sign = ({ history, match }) => {
         setEthBrowserError(true)
     }
   };
-
   const mintSign = useCallback(async (txHash) => {
-    const dob = moment(new Date(localStorage.getItem("dob"))).format('YYYY-MM-DD')
     const data = {
       user_address: ethAccount,
       transaction_hash: txHash,
-      dob,
+      dob: moment(dob).format('YYYY-MM-DD'),
       sign_hash: sign.hash
     }
     await api({
@@ -257,7 +260,7 @@ export const Sign = ({ history, match }) => {
           console.log(err.request)
         }
       })
-  }, [accountStats, ethAccount, getAccountStats, getSign, sign])
+  }, [accountStats, dob, ethAccount, getAccountStats, getSign, sign])
 
   const handleMintNFT = (e) => {
     e.preventDefault()
