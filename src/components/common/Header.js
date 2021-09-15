@@ -25,7 +25,7 @@ import HomeIcon from '@material-ui/icons/Home';
 // import ClearAllIcon from '@material-ui/icons/ClearAll';
 import PersonIcon from '@material-ui/icons/Person';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
-import { readProfile, authenticate3Id } from '../eth/identity';
+// import { readProfile, authenticate3Id } from '../eth/identity';
 import { StyledBadge } from './StyledBadge';
 
 const drawerWidth = 240;
@@ -156,9 +156,12 @@ const useStyles = makeStyles((theme) => ({
         color: "#A09FB2"
     },
     icon: {
-        width: "1.4em",
+
+        width: theme.spacing(4),
+        height: theme.spacing(4),
         borderRadius: "50%",
-        border: '1px solid #018AF2'
+        border: '1px solid #8247e5'
+
     },
     displayNone: {
         display: 'none',
@@ -193,13 +196,13 @@ export default function Header() {
     const [open, setOpen] = React.useState(false);
     const { smDeviceView, mobileView, setMobileDevice, setSmallDevice } = useContext(DeviceContext)
     const { ethAccount, getEthAccount, accountStats,
-        getAccountStats, getEthChainId, identityProfile, setThreeIdProfile } = useContext(EthContext)
+        getAccountStats, getEthChainId } = useContext(EthContext)
     const [setEthBrowserError] = React.useState(false)
     const [accountChecked, setAccountChecked] = React.useState(false)
     const [ethereum, setEthereum] = React.useState(null)
     const [statsChecked, setStatsChecked] = React.useState(false)
-    const [threeIdChecked, setThreeIdChecked] = React.useState(false)
-    const [profileFetched, setProfileFetched] = React.useState(false)
+    // const [threeIdChecked, setThreeIdChecked] = React.useState(false)
+    // const [profileFetched, setProfileFetched] = React.useState(false)
     const [adminSet, setAdminSet] = React.useState(false);
     const [headersData, setHeadersData] = React.useState([...headersRawData])
     let [width, setWidth] = React.useState(getWidth());
@@ -301,23 +304,23 @@ export default function Header() {
                 setEthBrowserError(true)
         }
     };
-    useEffect(() => {
-        if (identityProfile && !identityProfile.name && !threeIdChecked) {
-            authenticate3Id(ethAccount)
-            setThreeIdChecked(true)
-        }
-    }, [ethAccount, identityProfile, threeIdChecked])
+    // useEffect(() => {
+    //     if (identityProfile && !identityProfile.name && !threeIdChecked) {
+    //         authenticate3Id(ethAccount)
+    //         setThreeIdChecked(true)
+    //     }
+    // }, [ethAccount, identityProfile, threeIdChecked])
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        if (ethAccount && !identityProfile && !profileFetched) {
-            readProfile(ethAccount).then(profile => {
-                setThreeIdProfile(profile)
-                setProfileFetched(true)
-            })
-        }
+    //     if (ethAccount && !identityProfile && !profileFetched) {
+    //         readProfile(ethAccount).then(profile => {
+    //             setThreeIdProfile(profile)
+    //             setProfileFetched(true)
+    //         })
+    //     }
 
-    }, [ethAccount, identityProfile, profileFetched, setThreeIdProfile])
+    // }, [ethAccount, identityProfile, profileFetched, setThreeIdProfile])
 
     useEffect(() => {
         let timeoutId = null;
@@ -328,16 +331,16 @@ export default function Header() {
         timeoutId = setTimeout(() => {
             ethereum?.on('accountsChanged', (accounts) => {
                 getEthAccount(accounts[0])
-                readProfile(ethAccount).then(profile => {
-                    setThreeIdProfile(profile)
-                })
+                // readProfile(ethAccount).then(profile => {
+                //     setThreeIdProfile(profile)
+                // })
             });
             ethereum?.on('chainChanged', (chain) => {
                 getEthChainId(parseInt(chain, 16))
             });
         }, 150);
 
-    }, [ethAccount, ethereum, getEthAccount, getEthChainId, setThreeIdProfile])
+    }, [ethAccount, ethereum, getEthAccount, getEthChainId])
     useEffect(() => {
 
         const adminNav = {
@@ -388,11 +391,11 @@ export default function Header() {
                                     }}
                                     variant="dot"
                                 >
-                                    <img className={classes.icon} alt="Etherium" src={identityProfile?.avatar || "/assets/images/ethereum.svg"} />
+                                    <img className={classes.icon} alt="Etherium" src={"/assets/images/polygon-matic-logo.svg"} />
                                     {/* <Avatar style={{ border: '1px solid #018AF2' }} alt={"user.username"} src={"user.profile.image " ? "user.profile.image " : "."} /> */}
                                 </StyledBadge>
                                 <Typography className={classes.username} variant="subtitle1" component="p" gutterBottom>
-                                    {identityProfile && identityProfile.name ? identityProfile?.name + ` [${ethAccount.substr(ethAccount.length - 4, ethAccount.length)}]` : ethAccount.substr(0, 6) + '...' + ethAccount.substr(ethAccount.length - 4, ethAccount.length)}
+                                    {ethAccount.substr(0, 6) + '...' + ethAccount.substr(ethAccount.length - 4, ethAccount.length)}
                                 </Typography>
                             </IconButton>
                         </Fragment>
@@ -405,7 +408,7 @@ export default function Header() {
                 {accountChecked && !ethAccount &&
 
                     <Button onClick={connectAccount} fullWidth color="primary" variant="outlined" className={classes.authButton}>
-                        Connect Metamask Profile
+                        Connect Metamask Wallet
                     </Button>
                 }
 

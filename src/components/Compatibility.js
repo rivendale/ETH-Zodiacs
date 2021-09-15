@@ -9,18 +9,19 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Hidden from '@material-ui/core/Hidden';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
     card: {
         display: 'flex',
         minHeight: "10vh"
     },
     cardDetails: {
         flex: 1,
+        minHeight: theme.spacing(20)
     },
     cardMedia: {
         width: 160,
     },
-});
+}));
 
 export default function Compatibility(props) {
     const classes = useStyles();

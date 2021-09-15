@@ -1,16 +1,16 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import {
-    makeStyles, Container, Typography, Grid, Paper, Avatar, Box, Button,
+    makeStyles, Container, Typography, Grid, Paper, Avatar, Box,
 } from '@material-ui/core';
 // import { SimpleBackdrop } from './common/Loaders'
 import { EthContext } from '../../context/EthContext';
 import { getConnectedAccount, } from './EthAccount';
 import { SimpleBackdrop } from '../common/Loaders';
-import EditIcon from '@material-ui/icons/Edit';
+// import EditIcon from '@material-ui/icons/Edit';
 import { NFTTable } from './NFTTable';
 import api from '../../api';
-import { useHistory } from 'react-router-dom';
+// import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -123,7 +123,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 export const MyNFT = (props) => {
-    const history = useHistory()
+    // const history = useHistory()
 
     const classes = useStyles();
     const [ethAccountPresent, setEthAccountPresent] = useState(true)
@@ -159,14 +159,14 @@ export const MyNFT = (props) => {
         })
     }, [fetchSigns, loading])
 
-    const handleClick = () => {
-        history.push("/edit-profile")
-        window.scroll({
-            top: 0,
-            left: 0,
-            behavior: 'smooth'
-        });
-    }
+    // const handleClick = () => {
+    //     history.push("/edit-profile")
+    //     window.scroll({
+    //         top: 0,
+    //         left: 0,
+    //         behavior: 'smooth'
+    //     });
+    // }
     return (
         <React.Fragment>
             {!ethTokens && loading === true && <SimpleBackdrop open={true} />}
@@ -185,19 +185,21 @@ export const MyNFT = (props) => {
                                             <Grid item xs={9} className={classes.userDetails} >
                                                 <Box className={classes.userDetailsTextContent}>
                                                     <Typography gutterBottom style={{ fontWeight: "800" }}>
-                                                        {ethAccount.substr(0, 8) + '...' + ethAccount.substr(ethAccount.length - 4, ethAccount.length)}
+                                                        Wallet Address
+                                                        {/* {ethAccount.substr(0, 8) + '...' + ethAccount.substr(ethAccount.length - 4, ethAccount.length)} */}
                                                     </Typography>
                                                 </Box>
                                                 <Box className={classes.userDetailsTextContent}>
                                                     <Typography gutterBottom style={{ fontWeight: "400" }}>
-                                                        {identityProfile?.name}
+                                                        {/* {identityProfile?.name} */}
+                                                        {ethAccount.substr(0, 15) + '...' + ethAccount.substr(ethAccount.length - 7, ethAccount.length)}
                                                     </Typography>
                                                 </Box>
-                                                <Box className={classes.userDetailsTextContent}>
+                                                {/* <Box className={classes.userDetailsTextContent}>
                                                     <Button startIcon={<EditIcon color="primary" />} onClick={handleClick} variant="outlined" className={classes.editButton}>
                                                         Edit Profile
                                                     </Button>
-                                                </Box>
+                                                </Box> */}
                                             </Grid>
                                         </Grid>
                                     </Paper>
