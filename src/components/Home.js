@@ -16,6 +16,8 @@ import {
     Paper,
     CardActionArea,
     Hidden,
+    Box,
+    Chip
 } from '@material-ui/core';
 import { useHistory } from 'react-router';
 import {
@@ -49,7 +51,7 @@ var items = [
     {
         imgUrl: "https://res.cloudinary.com/dsw3onksq/image/upload/v1615526208/tiger_mi16hj.png",
         name: "Tiger",
-        description: "Truly, you would make a fine revolutionary. You are playful and unpredictable, daring and reckless. Always hating to be ignored, you love the spotlight and crave attention. You jump into action and sometimes regret it afterward. Life with a Tiger is bound to be a colorful, volatile roller-coaster ride. It will be filled with joy, laughter, tears, and despair.  Money doesn’t impress you, nor does it motivate you. You’re  known for your generosity. Travel is many times a favorite leisure activity. Exotic getaways where tourists are rare suit you well. Although loyal and generous, you prefer to be in charge and never remain long in a subordinate position."
+        description: "Truly, you would make a fine revolutionary. You are playful and unp#d6af9bictable, daring and reckless. Always hating to be ignored, you love the spotlight and crave attention. You jump into action and sometimes regret it afterward. Life with a Tiger is bound to be a colorful, volatile roller-coaster ride. It will be filled with joy, laughter, tears, and despair.  Money doesn’t impress you, nor does it motivate you. You’re  known for your generosity. Travel is many times a favorite leisure activity. Exotic getaways where tourists are rare suit you well. Although loyal and generous, you prefer to be in charge and never remain long in a subordinate position."
     },
     {
         imgUrl: "https://res.cloudinary.com/dsw3onksq/image/upload/v1615559952/rabbit_sjt1gi.png",
@@ -97,6 +99,38 @@ var items = [
         description: "You are everyone’s best friend and a supportive team member. You are completely devoted and will sacrifice your own welfare for others. Your love for food and luxury makes you excellent chefs or restaurant owners. You are romantic, affectionate, and monogamous once you commit to a relationship."
     },
 
+]
+export const elements = [
+    {
+        name: "water",
+        image: "https://res.cloudinary.com/dsw3onksq/image/upload/v1631762455/ethsigns/elements/Water_fefelw.png"
+    },
+    {
+        name: "wood",
+        image: "https://res.cloudinary.com/dsw3onksq/image/upload/v1631762487/ethsigns/elements/Wood_xvyguk.png"
+    },
+    {
+        name: "metal",
+        image: "https://res.cloudinary.com/dsw3onksq/image/upload/v1631762433/ethsigns/elements/Metal_kwrrtl.png"
+    },
+    {
+        name: "fire",
+        image: "https://res.cloudinary.com/dsw3onksq/image/upload/v1631762408/ethsigns/elements/Fire_yyej37.png"
+    },
+    {
+        name: "earth",
+        image: "https://res.cloudinary.com/dsw3onksq/image/upload/v1631762385/ethsigns/elements/Earth_ggtmjg.png"
+    },
+]
+export const force = [
+    {
+        name: "yin",
+        image: "https://res.cloudinary.com/dsw3onksq/image/upload/v1631766341/ethsigns/elements/black_zbiv9s.png"
+    },
+    {
+        name: "yang",
+        image: "https://res.cloudinary.com/dsw3onksq/image/upload/v1631766346/ethsigns/elements/white_ujghbq.png"
+    },
 ]
 
 const theme = createMuiTheme({
@@ -164,13 +198,25 @@ const useStyles = makeStyles((theme) => ({
 
     },
     card: {
-        // display: 'block',
-        // height: '60vh',
-        transitionDuration: '0.3s',
-        background: "#FFFFFF",
+        background: "#FBFDFF",
         border: "1px solid #F6FAFF",
         boxSizing: "border-box",
         boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.1)",
+        borderRadius: "16px",
+    },
+    detailsContainer: {
+        background: "#FFFFFF",
+        border: "1px solid #e4a687",
+        boxSizing: "border-box",
+        margin: theme.spacing(2, "auto", 1),
+        borderRadius: "16px",
+        minHeight: theme.spacing(15),
+    },
+    chipsContainer: {
+        background: "#FFFFFF",
+        border: "1px solid #e4a687",
+        boxSizing: "border-box",
+        margin: theme.spacing(2, 1, 1),
         borderRadius: "16px",
     },
     cardMedia: {
@@ -210,6 +256,16 @@ const useStyles = makeStyles((theme) => ({
     },
     carouselCardMedia: {
         width: 300,
+    },
+    elementImage: {
+        width: theme.spacing(10),
+        height: theme.spacing(10),
+
+    },
+    forceImage: {
+        width: theme.spacing(6),
+        height: theme.spacing(6),
+        marginLeft: theme.spacing(5),
     },
 }));
 
@@ -320,6 +376,7 @@ export const Home = () => {
     const handleCloseSnackbar = () => {
         setOpenSnackBar(false)
     }
+    const colors = ["primary", "secondary", "default"]
     return (
         <Fragment>
             {openSnackBar && <CustomSnackbar message="Address copied" open={openSnackBar} handleClose={handleCloseSnackbar} />}
@@ -469,8 +526,8 @@ export const Home = () => {
                                         </LazyLoad>
 
                                         <CardContent style={{ display: "grid" }} >
-                                            <div className={classes.cardMain}>
-                                                <div className={classes.cardDetail}>
+                                            <Box className={classes.cardMain}>
+                                                <Box className={classes.cardDetail}>
                                                     <Grid container spacing={1}>
                                                         <Grid item xs={6}>
                                                             <Typography style={{ fontWeight: "800" }} component="h4" variant="h5" color="textPrimary">
@@ -496,13 +553,59 @@ export const Home = () => {
                                                             </Typography>
                                                         </Grid>
                                                     </Grid>
-                                                </div>
-                                                <ul className={classes.ul}>
+                                                </Box>
+                                                <Grid container spacing={1} alignItems="center" justify="center">
+                                                    <Grid item xs={6} className={classes.detailsContainer}>
+                                                        <Typography color="textSecondary" align="center">
+                                                            <b>Element</b>
+                                                        </Typography>
+                                                        <Box style={{ borderTop: "1px solid #d6af9b" }} display="flex" flexDirection="row" alignItems="center" justifyContent="center">
+                                                            <Typography variant="subtitle1">
+                                                                {nft.token_metadata.element}
+                                                            </Typography>
+                                                            <img className={classes.elementImage} src={elements.find(i => i.name === nft.token_metadata.element.toLowerCase()).image} alt={nft.token_metadata.element} />
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} className={classes.detailsContainer}>
+                                                        <Typography color="textSecondary" align="center">
+                                                            <b>Force</b>
+                                                        </Typography>
+                                                        <Box style={{ paddingTop: "1.2em", borderTop: "1px solid #d6af9b" }} display="flex" flexDirection="row" alignItems="center">
+                                                            <Typography variant="subtitle1" style={{ marginLeft: ".9em" }}>
+                                                                {nft.token_metadata.force}
+                                                            </Typography>
+                                                            <img className={classes.forceImage} src={force?.find(i => i.name === nft.token_metadata.force.toLowerCase())?.image} alt={nft.token_metadata.force} />
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={12} className={classes.chipsContainer}>
+                                                        <Typography color="textSecondary" align="center" style={{ paddingBottom: ".2em", borderBottom: "1px solid #d6af9b" }} gutterBottom>
+                                                            <b>Positive traits</b>
+                                                        </Typography>
+                                                        <Box>
+                                                            {nft.token_metadata.positive_traits.map((trait, key) =>
+                                                                <Typography variant="caption" component="span" align="center" key={key}>
+                                                                    <Chip size="small" style={{ margin: ".1em" }} color={colors[Math.floor(Math.random() * colors.length)]} variant="outlined" label={trait} />
+                                                                </Typography>)}
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={12} className={classes.chipsContainer}>
+                                                        <Typography color="textSecondary" align="center" style={{ paddingBottom: ".2em", borderBottom: "1px solid #d6af9b" }} gutterBottom>
+                                                            <b>Negative traits</b>
+                                                        </Typography>
+                                                        <Box>
+                                                            {nft.token_metadata.negative_traits.map((trait, key) =>
+                                                                <Typography variant="caption" component="span" align="center" key={key}>
+                                                                    <Chip size="small" style={{ margin: ".1em" }} color={colors[Math.floor(Math.random() * colors.length)]} variant="outlined" label={trait} />
+                                                                </Typography>)}
+                                                        </Box>
+                                                    </Grid>
+                                                </Grid>
+                                                {/* <ul className={classes.ul}>
                                                     <Typography component="p" variant="subtitle1">
                                                         {nft.token_metadata.report[Math.floor(Math.random() * nft.token_metadata.report.length)].replace(/(.{150})..+/, "$1…")}
                                                     </Typography>
-                                                </ul>
-                                            </div>
+                                                </ul> */}
+                                            </Box>
                                         </CardContent>
                                         <CardActions className={classes.card}>
                                             <Button style={{ color: "#312E58" }} className={classes.button} href={`/nft/${nft.token_id}`} fullWidth variant="outlined" color="primary">
