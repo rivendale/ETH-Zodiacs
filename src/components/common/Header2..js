@@ -119,7 +119,7 @@ export default function Header(props) {
                         <Grid item xs={1}>
                             <Typography noWrap className={classes.toolbarTitle}>
                                 <Link variant="h6" color="inherit" href="/">
-                                    <img src="/assets/images/EthsignsLogo.png" alt="Ethsigns" className={classes.logo} />
+                                    <img src="/assets/images/Ethsignslogo.png" alt="Ethsigns" className={classes.logo} />
                                 </Link>
                             </Typography>
                         </Grid>

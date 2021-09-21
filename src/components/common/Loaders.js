@@ -51,7 +51,7 @@ export const SimpleBackdrop = ({ open }) => {
         <React.Fragment>
             <Backdrop className={classes.backdrop} open={open}>
                 {/* <CircularProgress color="inherit" /> */}
-                <img className={classes.spinningImg} alt="logo" src={"/assets/images/Logo.png"} />
+                <img className={classes.spinningImg} alt="logo" src={"/assets/images/logo.png"} />
 
             </Backdrop>
         </React.Fragment>

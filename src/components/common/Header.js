@@ -468,7 +468,7 @@ export default function Header() {
                     <Box className={classes.logo}>
                         <Link to="/">
                             <img
-                                src="/assets/images/Logo.png"
+                                src="/assets/images/logo.png"
                                 alt="logo"
                                 href="/"
 
