@@ -36,6 +36,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { CustomSnackbar } from "./common/SnackBar";
 import { BackgroundImage } from "react-image-and-background-image-fade";
 import Carousel from 'react-material-ui-carousel'
+import { SimpleBackdrop } from "./common/Loaders";
 
 var items = [
     {
@@ -379,6 +380,7 @@ export const Home = () => {
     const colors = ["primary", "secondary", "default"]
     return (
         <Fragment>
+            {!nfts && <SimpleBackdrop open={true} />}
             {openSnackBar && <CustomSnackbar message="Address copied" open={openSnackBar} handleClose={handleCloseSnackbar} />}
             <Container component="main" maxWidth="lg" className={classes.root}>
                 <CssBaseline />

@@ -30,6 +30,18 @@ const useStyles = makeStyles((theme) => ({
             marginTop: theme.spacing(2),
         },
     },
+    spinningImg: {
+        animation: '$spin 2s infinite linear',
+        height: theme.spacing(15),
+        width: theme.spacing(15),
+    },
+    '@keyframes spin': {
+        '0%': {
+            transform: 'rotate(0deg)',
+        }, '100%': {
+            transform: 'rotate(360deg)',
+        },
+    },
 }));
 
 export const SimpleBackdrop = ({ open }) => {
@@ -38,7 +50,9 @@ export const SimpleBackdrop = ({ open }) => {
     return (
         <React.Fragment>
             <Backdrop className={classes.backdrop} open={open}>
-                <CircularProgress color="inherit" />
+                {/* <CircularProgress color="inherit" /> */}
+                <img className={classes.spinningImg} alt="logo" src={"/assets/images/Logo.png"} />
+
             </Backdrop>
         </React.Fragment>
     );
