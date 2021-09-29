@@ -183,9 +183,9 @@ export const NFT = ({ history, match }) => {
       {nft && <Container maxWidth="lg" component="main">
         <SignHeader post={{ title: nft.token_metadata.name, description: nft.token_metadata.description, image: nft.image_url }} />
         <Grid container className={classes.tokenInfoWrapper} >
-          <Grid item sm={12} md={8}>
+          <Grid item sm={12}>
             <Grid container component={Paper} className={classes.tokenInfo} spacing={5}>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={3}>
                 <Box className={classes.tokenInfoSections}>
                   <Typography className={classes.tokenInfoSectionsTitle}>
                     Owner
@@ -196,7 +196,7 @@ export const NFT = ({ history, match }) => {
                   </Button>
                 </Box>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={3}>
                 <Box className={classes.tokenInfoSections}>
                   <Typography className={classes.tokenInfoSectionsTitle}>
                     IPFS URL
@@ -206,13 +206,23 @@ export const NFT = ({ history, match }) => {
                   </Button>
                 </Box>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={3}>
                 <Box className={classes.tokenInfoSections}>
                   <Typography className={classes.tokenInfoSectionsTitle}>
                     Gateway URL
                   </Typography>
                   <Button style={{ textTransform: "none" }} endIcon={<OpenInNewIcon />} onClick={() => { handleRedirect(nft.gateway_token_url) }}>
                     {nft.gateway_token_url.substr(0, 10) + '...' + nft.gateway_token_url.substr(nft.gateway_token_url.length - 4, nft.gateway_token_url.length)}
+                  </Button>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Box className={classes.tokenInfoSections}>
+                  <Typography className={classes.tokenInfoSectionsTitle}>
+                    Trine
+                  </Typography>
+                  <Button style={{ textTransform: "none" }} endIcon={<OpenInNewIcon />} href={`/nft-trines/${nft.token_metadata.name}`} >
+                    Got to Trine
                   </Button>
                 </Box>
               </Grid>

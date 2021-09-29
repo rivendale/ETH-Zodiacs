@@ -342,7 +342,6 @@ export const NFTTable = ({ tokens }) => {
 
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, tokens.length - page * rowsPerPage);
     return (
         <div className={classes.root}>
             <TransferNFT
@@ -446,11 +445,9 @@ export const NFTTable = ({ tokens }) => {
                                         </TableRow>
                                     );
                                 })}
-                            {emptyRows > 0 && (
-                                <TableRow style={{ height: (53) * emptyRows }}>
-                                    <TableCell colSpan={6} />
-                                </TableRow>
-                            )}
+                            <TableRow style={{ height: (53) * 1 }}>
+                                <TableCell colSpan={6} />
+                            </TableRow>
                         </TableBody>
                     </Table>
                 </TableContainer>

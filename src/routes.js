@@ -13,6 +13,8 @@ import { Profile } from "./components/Profile";
 import { Sign } from "./components/Sign";
 import { NFT } from "./components/NFT";
 import { EditProfile } from "./components/profile/EditProfile";
+import { Trine } from "./components/Trine";
+import { Trines } from "./components/Trines";
 
 
 const BaseRouter = () => (
@@ -26,6 +28,8 @@ const BaseRouter = () => (
             <Route exact path="/sign/:dob" component={Sign} />
             <Route exact path="/manage" component={Profile} />
             <Route exact path="/edit-profile" component={EditProfile} />
+            <Route exact path="/nft-trines" component={Trines} />
+            <Route exact path="/nft-trines/:nftName" component={Trine} />
             <Route exact path="/zodiac-sign/edit/:signId" component={EditYearSign} />
             <Route exact path="*" component={Error404Page} />
 

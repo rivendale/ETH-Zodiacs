@@ -15,7 +15,7 @@ import api from '../../api';
 const useStyles = makeStyles((theme) => ({
     root: {
         padding: theme.spacing(8, 0, 6),
-        minHeight: '50vh',
+        minHeight: '75vh',
         // margin: theme.spacing(1),
     },
 

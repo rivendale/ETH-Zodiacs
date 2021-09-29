@@ -34,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
         animation: '$spin 2s infinite linear',
         height: theme.spacing(15),
         width: theme.spacing(15),
+        borderRadius: '50%',
     },
     '@keyframes spin': {
         '0%': {

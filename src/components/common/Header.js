@@ -22,7 +22,7 @@ import {
     getChainId
 } from '../eth/EthAccount';
 import HomeIcon from '@material-ui/icons/Home';
-// import ClearAllIcon from '@material-ui/icons/ClearAll';
+import PeopleIcon from '@material-ui/icons/People';
 import PersonIcon from '@material-ui/icons/Person';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 // import { readProfile, authenticate3Id } from '../eth/identity';
@@ -173,11 +173,11 @@ const headersRawData = [
         href: "/",
         icon: <HomeIcon />,
     },
-    // {
-    //     label: "All Signs",
-    //     href: "/year-signs",
-    //     icon: <ClearAllIcon />,
-    // },
+    {
+        label: "Trines",
+        href: "/nft-trines",
+        icon: <PeopleIcon />,
+    },
     {
         label: "My Profile",
         href: "/profile",
@@ -407,7 +407,7 @@ export default function Header() {
 
                 {accountChecked && !ethAccount &&
 
-                    <Button onClick={connectAccount} fullWidth color="primary" variant="outlined" className={classes.authButton}>
+                    <Button style={{ margin: "auto" }} onClick={connectAccount} fullWidth color="primary" variant="outlined" className={classes.authButton}>
                         Connect Metamask Wallet
                     </Button>
                 }
