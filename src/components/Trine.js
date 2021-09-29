@@ -202,7 +202,7 @@ export const Trine = ({ history, match }) => {
 
                         >
                           <BackgroundImage
-                            src={`https://api.allorigins.win/raw?url=${item.image_url}`}
+                            src={`${item.image_url}`}
                             width="100%"
                             height="90%"
                             alt={item.token_metadata.name}

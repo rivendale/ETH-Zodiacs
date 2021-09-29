@@ -121,7 +121,7 @@ export const Trines = ({ history, match }) => {
 
                               >
                                 {/* <BackgroundImage
-                                  src={`https://api.allorigins.win/raw?url=${animals[animal]}`}
+                                  src={`${animals[animal]}`}
                                   width="100%"
                                   height="90%"
                                   alt={animal}
@@ -133,7 +133,7 @@ export const Trines = ({ history, match }) => {
                             </LazyLoad>
                             {/* <CardMedia
                             component="img"
-                            image={`https://api.allorigins.win/raw?url=${item.image_url}`}
+                            image={`${item.image_url}`}
                             alt="random"
                           /> */}
                             <CardContent>
