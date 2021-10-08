@@ -235,7 +235,7 @@ export const MyNFT = (props) => {
                             You do not have any NFTs
                         </Typography>
                         <Typography variant="h6" align="center" color="textSecondary" component="p">
-                            Click <a href="/" >here</a> to enter your date of birth and mint NFT
+                            You can mint one NFT by clicking <a href="/" >here</a> and enter your date of birth
                         </Typography>
                     </div>}
 

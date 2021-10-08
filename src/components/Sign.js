@@ -193,7 +193,6 @@ export const Sign = ({ history, match }) => {
     setSignUpdated(false)
   }, [yearSigns, sign])
 
-
   const handleClick = (e, value) => {
     e.preventDefault()
     const zodiacSign = yearSigns.find(x => x.id === value)
@@ -247,6 +246,7 @@ export const Sign = ({ history, match }) => {
       let updatedSign = sign
       let updatedStats = accountStats
       updatedStats.pending_mints += 1
+      updatedStats.free_mint = false
       updatedSign.minted = true
       getSign(updatedSign)
       getAccountStats(updatedStats)
@@ -270,12 +270,18 @@ export const Sign = ({ history, match }) => {
       setMinting(true)
       getAccount(true).then(acc => {
         if (!acc) { setMinting(false); return }
-        payMintingFee({ amountToSend: sign.minting_fee }).then(data => {
-          if (!data) { setMinting(false); return }
-          const { transactionHash, errorMessage } = data
-          if (errorMessage) { setMintingError(errorMessage); setMinting(false); return }
-          else { mintSign(transactionHash) }
-        })
+        if (accountStats?.free_mint) {
+          setMinting(false)
+          mintSign(null)
+        }
+        else {
+          payMintingFee({ amountToSend: sign.minting_fee }).then(data => {
+            if (!data) { setMinting(false); return }
+            const { transactionHash, errorMessage } = data
+            if (errorMessage) { setMintingError(errorMessage); setMinting(false); return }
+            else { mintSign(transactionHash) }
+          })
+        }
       })
     })
   }
@@ -312,7 +318,11 @@ export const Sign = ({ history, match }) => {
       {sign && <Container maxWidth="lg" component="main">
         <SignHeader post={{ title: sign.name, description: sign.description, image: sign.image_url }} />
         {transactionHash && <span>
-          Your transaction is being processed. For more details, click <a rel="noopener noreferrer" href={`${Config.TX_EXPLORER}/${transactionHash}`} target="_blank">here</a> to view it <br />
+          Your transaction is being processed.
+          {transactionHash !== 'free' &&
+            <span> For more details, click <a rel="noopener noreferrer" href={`${Config.TX_EXPLORER}/${transactionHash}`} target="_blank">here</a> to view it
+            </span>}
+          <br />
           Your minted NFT should be listed in your <a href="/profile">NFT page</a> within 5 minutes of the transaction completion.
         </span>}
         {mintingError &&
@@ -351,7 +361,7 @@ export const Sign = ({ history, match }) => {
                       <Box elevation={2} component={Paper} display="flex" justifyContent="left" alignItems="left" className={classes.mintingFeeDisplay}>
                         <img src={"/assets/images/polygon-matic-logo.svg"} alt="minting" className={classes.maticLogo} />
                         <Typography className={classes.mintingFee}>
-                          Mint this NFT for <b>{sign.minting_fee} Matic</b>  and Join the club
+                          Mint this NFT for <b>{accountStats?.free_mint ? "FREE" : sign.minting_fee + " Matic"}</b>  and Join the club
                         </Typography>
                       </Box>
                     </Box>

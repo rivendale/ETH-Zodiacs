@@ -17,7 +17,7 @@ export const EthIcon = ({ ethAccount }) => {
     return (
         <Fragment>
             <span className={classes.root}>
-                <img className={classes.icon} alt="Etherium" src={"/assets/images/ethereum.svg"} /> {ethAccount.substr(0, 6) + '...' + ethAccount.substr(ethAccount.length - 4, ethAccount.length)}
+                <img className={classes.icon} alt="Etherium" src={"/assets/images/ethereum.svg"} /> {ethAccount?.substr(0, 6) + '...' + ethAccount?.substr(ethAccount?.length - 4, ethAccount?.length)}
 
             </span>
         </Fragment>

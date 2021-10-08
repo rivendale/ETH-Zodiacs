@@ -331,6 +331,9 @@ export default function Header() {
         timeoutId = setTimeout(() => {
             ethereum?.on('accountsChanged', (accounts) => {
                 getEthAccount(accounts[0])
+                // if (window.location.pathname.includes("/sign/")) {
+                //     window.location.reload()
+                // }
                 // readProfile(ethAccount).then(profile => {
                 //     setThreeIdProfile(profile)
                 // })
@@ -518,8 +521,10 @@ export default function Header() {
                 mobileView &&
                 <Drawer
                     className={classes.drawer}
-                    variant="persistent"
+                    variant="temporary"
                     anchor="left"
+                    onEscapeKeyDown={handleDrawerClose}
+                    onBackdropClick={handleDrawerClose}
                     open={open}
                     classes={{
                         paper: classes.drawerPaper,
