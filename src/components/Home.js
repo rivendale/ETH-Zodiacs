@@ -283,7 +283,6 @@ export const Home = () => {
     const handleCloseSnackbar = () => {
         setOpenSnackBar(false)
     }
-    const colors = ["primary", "secondary", "default"]
     return (
         <Fragment>
             {!nfts && <SimpleBackdrop open={true} />}
@@ -490,9 +489,9 @@ export const Home = () => {
                                                             <b>Positive traits</b>
                                                         </Typography>
                                                         <Box>
-                                                            {nft.token_metadata.positive_traits.map((trait, key) =>
+                                                            {(nft.token_metadata?.element_attributes?.positive_traits || nft.token_metadata.positive_traits).map((trait, key) =>
                                                                 <Typography variant="caption" component="span" align="center" key={key}>
-                                                                    <Chip size="small" style={{ margin: ".1em" }} color={colors[Math.floor(Math.random() * colors.length)]} variant="outlined" label={trait} />
+                                                                    <Chip size="small" style={{ margin: ".1em" }} color="secondary" variant="outlined" label={trait} />
                                                                 </Typography>)}
                                                         </Box>
                                                     </Grid>
@@ -501,9 +500,9 @@ export const Home = () => {
                                                             <b>Negative traits</b>
                                                         </Typography>
                                                         <Box>
-                                                            {nft.token_metadata.negative_traits.map((trait, key) =>
+                                                            {(nft.token_metadata?.element_attributes?.negative_traits || nft.token_metadata.negative_traits).map((trait, key) =>
                                                                 <Typography variant="caption" component="span" align="center" key={key}>
-                                                                    <Chip size="small" style={{ margin: ".1em" }} color={colors[Math.floor(Math.random() * colors.length)]} variant="outlined" label={trait} />
+                                                                    <Chip size="small" style={{ margin: ".1em" }} color="primary" variant="outlined" label={trait} />
                                                                 </Typography>)}
                                                         </Box>
                                                     </Grid>
