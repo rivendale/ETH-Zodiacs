@@ -7,21 +7,21 @@ import Link from '@material-ui/core/Link';
 
 const useStyles = makeStyles((theme) => ({
     footer: {
-        backgroundImage: `url(/assets/images/banner.png)`,
+        // backgroundImage: `url(/assets/images/banner.png)`,
         backgroundPosition: "bottom",
         backgroundRepeat: "no-repeat",
         backgroundSize: '100% 100%',
         marginTop: theme.spacing(1),
+        backgroundColor: "#E0EDFF",
         [theme.breakpoints.down('xs')]: {
             backgroundImage: 'none',
-            backgroundColor: "#E0EDFF",
         }
     },
     footerContent: {
         padding: theme.spacing(6, 0),
     },
     textContent: {
-        color: '#fff',
+        // color: '#fff',
         [theme.breakpoints.down('xs')]: {
             color: '#000',
         }
@@ -33,7 +33,10 @@ export default function Footer() {
 
     return (
         <footer className={classes.footer}>
-            <Container maxWidth={false} style={{ backdropFilter: "blur(4px)" }}>
+            <Container
+                maxWidth={false}
+            //  style={{ backdropFilter: "blur(4px)" }}
+            >
                 <Container maxWidth="lg" className={classes.footerContent}>
                     <Typography className={classes.textContent} variant="h6" align="center" gutterBottom>
                         Zodiacs Club

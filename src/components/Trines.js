@@ -93,7 +93,7 @@ export const Trines = ({ history, match }) => {
                 align="center"
                 gutterBottom
               >
-                <b>Here are the four trines trines</b>
+                <b>Here are the four trines</b>
               </Typography>
               {trines.map((trine, key) =>
                 <Box className={classes.trine} key={key} display="flex" flexDirection="column" flexWrap="wrap">
