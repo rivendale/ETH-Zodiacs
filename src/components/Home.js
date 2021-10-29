@@ -38,6 +38,7 @@ import { BackgroundImage } from "react-image-and-background-image-fade";
 import Carousel from 'react-material-ui-carousel'
 import { SimpleBackdrop } from "./common/Loaders";
 import { animals, elements, force } from "./common/extras";
+import { FloatingButton } from "./common/FloatingButton";
 
 
 const theme = createMuiTheme({
@@ -285,6 +286,7 @@ export const Home = () => {
     }
     return (
         <Fragment>
+            <FloatingButton />
             {!nfts && <SimpleBackdrop open={true} />}
             {openSnackBar && <CustomSnackbar message="Address copied" open={openSnackBar} handleClose={handleCloseSnackbar} />}
             <Container component="main" maxWidth="lg" className={classes.root}>

@@ -7,7 +7,8 @@ import {
     ListItemSecondaryAction,
     IconButton
 } from '@material-ui/core';
-import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos'; import { GlobalContext } from "../context/GlobalState";
+import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
+import { GlobalContext } from "../context/GlobalState";
 import api from "../api";
 import { SimpleBackdrop } from './common/Loaders';
 
