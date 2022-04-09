@@ -26,7 +26,7 @@
     "ipfs-http-client": "^49.0.4",
     "it-all": "^1.0.5",
     "material-ui-chip-input": "^2.0.0-beta.2",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "nft.storage": "^1.1.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
